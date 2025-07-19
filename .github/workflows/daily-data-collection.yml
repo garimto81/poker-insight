@@ -50,7 +50,7 @@ jobs:
       
     - name: Upload collection logs
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: collection-logs-${{ github.run_number }}
         path: |
@@ -97,7 +97,7 @@ jobs:
         python generate_weekly_report.py
         
     - name: Upload weekly report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: weekly-report-${{ github.run_number }}
         path: weekly_report_*.html
