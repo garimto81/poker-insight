@@ -2,8 +2,8 @@ name: Daily Poker Data Collection
 
 on:
   schedule:
-    # 매일 UTC 기준 01:00, 09:00, 17:00에 실행 (한국시간 10:00, 18:00, 02:00)
-    - cron: '0 1,9,17 * * *'
+    # 매일 UTC 기준 09:00에 실행 (한국시간 18:00)
+    - cron: '0 9 * * *'
   workflow_dispatch:  # 수동 실행 가능
     inputs:
       manual_run:
