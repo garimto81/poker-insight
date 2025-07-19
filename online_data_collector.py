@@ -67,6 +67,13 @@ class OnlineDataCollector:
             logger.error(f"데이터베이스 연결 실패: {str(e)}")
             logger.error(f"DB_TYPE: {DB_TYPE}")
             logger.error(f"DATABASE_URL 존재: {'Yes' if self.db_url else 'No'}")
+            # 연결 문자열에서 민감정보 제거하여 로깅
+            if self.db_url:
+                try:
+                    safe_url = self.db_url.split('@')[1] if '@' in self.db_url else 'invalid_format'
+                    logger.error(f"DB 호스트: {safe_url}")
+                except:
+                    logger.error("DB URL 파싱 실패")
             raise
     
     def setup_database(self):
@@ -423,14 +430,35 @@ def main():
     print("온라인 포커 데이터 수집기 시작")
     print("=" * 50)
     
-    collector = OnlineDataCollector()
-    success = collector.run_online_collection()
-    
-    if success:
-        print("온라인 데이터 수집 성공")
-        sys.exit(0)
-    else:
-        print("온라인 데이터 수집 실패")
+    try:
+        # 환경변수 확인
+        db_url = os.getenv('DATABASE_URL', '')
+        db_type = os.getenv('DB_TYPE', 'postgresql')
+        
+        logger.info(f"환경변수 확인:")
+        logger.info(f"  DB_TYPE: {db_type}")
+        logger.info(f"  DATABASE_URL 존재: {'Yes' if db_url else 'No'}")
+        
+        if not db_url:
+            logger.error("❌ DATABASE_URL 환경변수가 설정되지 않았습니다")
+            print("FAILED: DATABASE_URL not set")
+            sys.exit(1)
+        
+        collector = OnlineDataCollector()
+        success = collector.run_online_collection()
+        
+        if success:
+            print("온라인 데이터 수집 성공")
+            logger.info("✅ 전체 프로세스 완료")
+            sys.exit(0)
+        else:
+            print("온라인 데이터 수집 실패")
+            logger.error("❌ 데이터 수집 프로세스 실패")
+            sys.exit(1)
+            
+    except Exception as e:
+        logger.error(f"❌ 치명적 오류: {str(e)}")
+        print(f"CRITICAL ERROR: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":
