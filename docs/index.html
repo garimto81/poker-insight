@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GG POKER 모니터링 대시보드</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1200px; margin: 0 auto; 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 15px; padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #2c3e50; margin: 0; }
+        .header p { color: #7f8c8d; margin: 5px 0; }
+        .status-card { 
+            background: white; padding: 20px; border-radius: 10px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center;
+            margin: 20px 0;
+        }
+        .status-title { font-size: 1.5em; font-weight: bold; color: #3498db; }
+        .status-message { color: #7f8c8d; margin-top: 10px; }
+        .links { margin-top: 30px; }
+        .link-button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .link-button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 GG POKER 모니터링 대시보드</h1>
+            <p>실시간 포커 사이트 트래픽 분석</p>
+        </div>
+        
+        <div class="status-card">
+            <div class="status-title">시스템 활성화 중</div>
+            <div class="status-message">
+                데이터 수집이 진행 중입니다.<br>
+                첫 번째 대시보드 업데이트까지 잠시만 기다려주세요.
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <div class="status-title">📊 수집 현황</div>
+            <div class="status-message">
+                • PokerScout 사이트 모니터링: 활성화<br>
+                • SQLite 백업 시스템: 준비 완료<br>
+                • 자동 업데이트: 매일 3회 실행
+            </div>
+        </div>
+        
+        <div class="links">
+            <h3>관련 링크</h3>
+            <a href="https://github.com/garimto81/poker-insight" class="link-button">GitHub Repository</a>
+            <a href="https://github.com/garimto81/poker-insight/actions" class="link-button">GitHub Actions</a>
+            <a href="api_data.json" class="link-button">API 데이터</a>
+        </div>
+        
+        <div style="text-align: center; color: #7f8c8d; font-size: 0.9em; margin-top: 30px;">
+            시스템 활성화: 2025-07-19<br>
+            다음 업데이트: 자동 진행 중
+        </div>
+    </div>
+</body>
+</html>
