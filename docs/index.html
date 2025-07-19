@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -47,55 +48,54 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>GG POKER 모니터링 대시보드</h1>
-            <p>실시간 포커 사이트 트래픽 분석 (데모 데이터)</p>
+            <h1>🎯 GG POKER 모니터링 대시보드</h1>
+            <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트</p>
         </div>
         
         <div class="stats">
             <div class="stat-card gg-highlight">
-                <div class="stat-number">2</div>
+                <div class="stat-number">0</div>
                 <div class="stat-label">GG POKER 사이트</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">8</div>
+                <div class="stat-number">5</div>
                 <div class="stat-label">모니터링 사이트</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">236,084</div>
+                <div class="stat-number">2,235</div>
                 <div class="stat-label">현재 총 플레이어</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">7</div>
+                <div class="stat-number">30</div>
                 <div class="stat-label">데이터 수집 기간 (일)</div>
             </div>
         </div>
         
         <div class="chart-container">
-            <h3>사이트별 플레이어 트렌드 (최근 7일)</h3>
+            <h3>📈 사이트별 플레이어 트렌드</h3>
             <div class="chart-wrapper">
                 <canvas id="trendChart"></canvas>
             </div>
         </div>
         
         <div class="chart-container">
-            <h3>현재 사이트 현황</h3>
+            <h3>🎯 현재 사이트 현황</h3>
             <div class="chart-wrapper">
                 <canvas id="currentChart"></canvas>
             </div>
         </div>
         
         <div class="last-updated">
-            마지막 업데이트: 2025-07-19 23:44:20 (데모 데이터)<br>
-            <a href="api_data.json">API 데이터</a> | <a href="api_summary.json">요약 데이터</a>
+            마지막 업데이트: 2025-07-19 23:54:31 UTC
         </div>
     </div>
 
     <script>
-        const dashboardData = {"last_updated": "2025-07-19T23:44:20.681716", "data_period_days": 7, "sites": {"GGNetwork": {"name": "GGNetwork", "category": "GG_POKER", "data": {"dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "players_online": [126245, 128931, 131617, 134304, 136990, 139676, 142362], "cash_players": [83876, 85660, 87445, 89230, 91014, 92799, 94583], "peak_24h": [136937, 139850, 142764, 145678, 148591, 151505, 154418], "seven_day_avg": [118336, 120854, 123372, 125890, 128407, 130925, 133443]}}, "PokerStars": {"name": "PokerStars", "category": "COMPETITOR", "data": {"dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "players_online": [52207, 53318, 54429, 55540, 56650, 57761, 58872], "cash_players": [36566, 37344, 38122, 38900, 39678, 40456, 41234], "peak_24h": [58599, 59846, 61093, 62340, 63586, 64833, 66080], "seven_day_avg": [55196, 56371, 57545, 58720, 59894, 61068, 62243]}}, "WPT Global": {"name": "WPT Global", "category": "COMPETITOR", "data": {"dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "players_online": [11703, 11952, 12201, 12450, 12699, 12948, 13197], "cash_players": [8366, 8544, 8722, 8900, 9078, 9256, 9434], "peak_24h": [14729, 15043, 15356, 15670, 15983, 16296, 16610], "seven_day_avg": [12408, 12672, 12936, 13200, 13464, 13728, 13992]}}, "888poker": {"name": "888poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "players_online": [8384, 8563, 8741, 8920, 9098, 9276, 9455], "cash_players": [6373, 6508, 6644, 6780, 6915, 7051, 7186], "peak_24h": [9823, 10032, 10241, 10450, 10659, 10868, 11077], "seven_day_avg": [8789, 8976, 9163, 9350, 9537, 9724, 9911]}}, "partypoker": {"name": "partypoker", "category": "COMPETITOR", "data": {"dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "players_online": [7416, 7574, 7732, 7890, 8047, 8205, 8363], "cash_players": [5264, 5376, 5488, 5600, 5712, 5824, 5936], "peak_24h": [8572, 8755, 8937, 9120, 9302, 9484, 9667], "seven_day_avg": [7745, 7910, 8075, 8240, 8404, 8569, 8734]}}, "GGPoker ON": {"name": "GGPoker ON", "category": "GG_POKER", "data": {"dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "players_online": [6345, 6480, 6615, 6750, 6885, 7020, 7155], "cash_players": [4596, 4694, 4792, 4890, 4987, 5085, 5183], "peak_24h": [7416, 7574, 7732, 7890, 8047, 8205, 8363], "seven_day_avg": [6674, 6816, 6958, 7100, 7242, 7384, 7526]}}, "Chico Poker": {"name": "Chico Poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "players_online": [5329, 5443, 5556, 5670, 5783, 5896, 6010], "cash_players": [3854, 3936, 4018, 4100, 4182, 4264, 4346], "peak_24h": [6476, 6614, 6752, 6890, 7027, 7165, 7303], "seven_day_avg": [5828, 5952, 6076, 6200, 6324, 6448, 6572]}}, "iPoker": {"name": "iPoker", "category": "COMPETITOR", "data": {"dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "players_online": [4286, 4377, 4468, 4560, 4651, 4742, 4833], "cash_players": [3008, 3072, 3136, 3200, 3264, 3328, 3392], "peak_24h": [5329, 5443, 5556, 5670, 5783, 5896, 6010], "seven_day_avg": [4596, 4694, 4792, 4890, 4987, 5085, 5183]}}}, "dates": ["2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19"], "summary": {"total_sites": 8, "gg_poker_sites": 2, "latest_total_players": 236084, "data_points": 56}};
+        const dashboardData = {"last_updated": "2025-07-19T23:54:31.785705", "data_period_days": 30, "sites": {"0": {"name": "0", "category": "COMPETITOR", "data": {"dates": ["2025-07-19"], "players_online": [54], "cash_players": [54], "peak_24h": [0], "seven_day_avg": [0]}}, "15": {"name": "15", "category": "COMPETITOR", "data": {"dates": ["2025-07-19"], "players_online": [0], "cash_players": [28], "peak_24h": [7], "seven_day_avg": [0]}}, "2,989": {"name": "2,989", "category": "COMPETITOR", "data": {"dates": ["2025-07-19"], "players_online": [1596], "cash_players": [3478], "peak_24h": [2400], "seven_day_avg": [0]}}, "332": {"name": "332", "category": "COMPETITOR", "data": {"dates": ["2025-07-19"], "players_online": [22], "cash_players": [210], "peak_24h": [100], "seven_day_avg": [0]}}, "4,693": {"name": "4,693", "category": "COMPETITOR", "data": {"dates": ["2025-07-19"], "players_online": [563], "cash_players": [625], "peak_24h": [350], "seven_day_avg": [0]}}}, "dates": ["2025-07-19"], "summary": {"total_sites": 5, "gg_poker_sites": 0, "latest_total_players": 2235, "data_points": 5}};
         
         // 트렌드 차트
         const trendCtx = document.getElementById('trendChart').getContext('2d');
-        const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e', '#95a5a6'];
+        const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
         
         const trendDatasets = [];
         let colorIndex = 0;
@@ -175,3 +175,4 @@
     </script>
 </body>
 </html>
+        

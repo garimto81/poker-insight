@@ -43,7 +43,8 @@ logger = logging.getLogger(__name__)
 class OnlineDataCollector:
     def __init__(self):
         self.db_url = DATABASE_URL
-        self.use_sqlite_fallback = False  # SQLite fallback 플래그
+        # DATABASE_URL이 없으면 자동으로 SQLite 사용
+        self.use_sqlite_fallback = not bool(DATABASE_URL)
         self.scraper = cloudscraper.create_scraper(
             browser={'browser': 'chrome', 'platform': 'linux', 'mobile': False}
         )
@@ -473,9 +474,8 @@ def main():
         logger.info(f"  DATABASE_URL 존재: {'Yes' if db_url else 'No'}")
         
         if not db_url:
-            logger.error("❌ DATABASE_URL 환경변수가 설정되지 않았습니다")
-            print("FAILED: DATABASE_URL not set")
-            sys.exit(1)
+            logger.warning("[WARNING] DATABASE_URL not set, using SQLite fallback")
+            print("[INFO] Using SQLite fallback for local execution")
         
         collector = OnlineDataCollector()
         success = collector.run_online_collection()
