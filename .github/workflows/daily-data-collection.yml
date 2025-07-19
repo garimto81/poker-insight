@@ -14,7 +14,6 @@ on:
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   DB_TYPE: ${{ secrets.DB_TYPE }}
-  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
 jobs:
   collect-poker-data:
@@ -67,16 +66,6 @@ jobs:
           *.log
           collection_report_*.json
         retention-days: 30
-        
-    - name: Send Discord notification on success
-      if: steps.collection.outcome == 'success'
-      run: |
-        python send_notification.py --status success
-        
-    - name: Send Discord notification on failure
-      if: steps.collection.outcome == 'failure'
-      run: |
-        python send_notification.py --status failure
         
     - name: Update dashboard data
       if: steps.collection.outcome == 'success'

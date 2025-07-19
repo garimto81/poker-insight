@@ -50,7 +50,6 @@ git push origin main
 ```yaml
 DATABASE_URL: "postgresql://user:password@host:port/database"
 DB_TYPE: "postgresql"
-DISCORD_WEBHOOK: "https://discord.com/api/webhooks/..." (선택사항)
 ```
 
 ### 4단계: GitHub Pages 활성화
@@ -106,18 +105,6 @@ DATABASE_URL: "mysql://[user]:[password]@[host]/[database]"
 DB_TYPE: "mysql"
 ```
 
-## 🚨 Discord 알림 설정 (선택사항)
-
-### Discord Webhook 생성
-1. Discord 서버 > 채널 설정 > 연동
-2. Webhook 생성
-3. Webhook URL 복사
-4. GitHub Secrets에 `DISCORD_WEBHOOK` 추가
-
-### 알림 내용
-- ✅ **수집 성공**: 총 사이트 수, GG POKER 현황, 플레이어 통계
-- ❌ **수집 실패**: 오류 알림 및 로그 확인 안내
-- 📊 **주간 리포트**: 매주 일요일 요약 통계
 
 ## 🔍 문제 해결
 
