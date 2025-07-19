@@ -219,7 +219,7 @@ class OnlineDataCollector:
             raise
     
     def crawl_pokerscout_data(self):
-        """PokerScout 크롤링"""
+        """PokerScout 크롤링 - 새로운 HTML 구조 대응"""
         logger.info("🔍 PokerScout 온라인 크롤링 시작...")
         
         try:
@@ -234,39 +234,55 @@ class OnlineDataCollector:
                 return []
             
             collected_data = []
-            rows = table.find_all('tr')[1:]
+            rows = table.find_all('tr')[1:]  # Skip header
+            logger.info(f"📊 발견된 행 수: {len(rows)}")
             
-            for row in rows:
+            for i, row in enumerate(rows):
                 try:
-                    cells = row.find_all('td')
-                    if len(cells) < 6:
+                    # 새로운 HTML 구조에서 데이터 추출
+                    all_texts = []
+                    for element in row.find_all(['span', 'div', 'td']):
+                        text = element.get_text(strip=True)
+                        if text and len(text) > 0:
+                            all_texts.append(text)
+                    
+                    if len(all_texts) < 5:
                         continue
                     
-                    site_name = cells[1].get_text(strip=True)
+                    # 사이트명 추출 - "1GGNetwork"에서 "GGNetwork" 추출
+                    site_name_raw = all_texts[0] if all_texts else ""
                     
-                    # 모든 사이트 수집 (필터링 제거)
-                    if not site_name or site_name.strip() == '':
+                    # 숫자로 시작하는 경우 숫자 제거
+                    site_name = re.sub(r'^\d+', '', site_name_raw).strip()
+                    
+                    if not site_name or len(site_name) < 2:
                         continue
                     
-                    # 데이터 추출
-                    players_text = cells[2].get_text(strip=True).replace(',', '')
-                    players_online = int(re.sub(r'[^\d]', '', players_text)) if re.sub(r'[^\d]', '', players_text) else 0
+                    # 숫자 데이터 추출 (콤마 제거)
+                    numbers = []
+                    for text in all_texts:
+                        clean_text = text.replace(',', '')
+                        if clean_text.isdigit() and int(clean_text) >= 0:
+                            numbers.append(int(clean_text))
                     
-                    cash_text = cells[3].get_text(strip=True).replace(',', '')
-                    cash_players = int(re.sub(r'[^\d]', '', cash_text)) if re.sub(r'[^\d]', '', cash_text) else 0
-                    
-                    peak_text = cells[4].get_text(strip=True).replace(',', '')
-                    peak_24h = int(re.sub(r'[^\d]', '', peak_text)) if re.sub(r'[^\d]', '', peak_text) else 0
-                    
-                    avg_text = cells[5].get_text(strip=True).replace(',', '')
-                    seven_day_avg = int(re.sub(r'[^\d]', '', avg_text)) if re.sub(r'[^\d]', '', avg_text) else 0
-                    
-                    # 최소 플레이어 수가 있는 사이트만 포함 (노이즈 제거)
-                    if players_online == 0 and cash_players == 0:
+                    # 최소 4개의 숫자가 필요 (players_online, cash_players, peak_24h, seven_day_avg)
+                    if len(numbers) < 4:
                         continue
+                    
+                    players_online = numbers[0] if len(numbers) > 0 else 0
+                    cash_players = numbers[1] if len(numbers) > 1 else 0
+                    peak_24h = numbers[2] if len(numbers) > 2 else 0
+                    seven_day_avg = numbers[3] if len(numbers) > 3 else 0
+                    
+                    # 데이터 검증 - 모든 값이 0인 경우 제외
+                    if players_online == 0 and cash_players == 0 and peak_24h == 0:
+                        continue
+                    
+                    # 사이트명 정규화
+                    site_name = self.normalize_site_name(site_name)
                     
                     site_data = {
-                        'site_name': site_name,  # 원본 사이트명 사용
+                        'site_name': site_name,
                         'players_online': players_online,
                         'cash_players': cash_players,
                         'peak_24h': peak_24h,
@@ -278,10 +294,10 @@ class OnlineDataCollector:
                     # GG POKER 사이트는 특별 표시
                     is_gg = any(gg in site_name for gg in self.gg_poker_sites)
                     emoji = "🎯" if is_gg else "✅"
-                    logger.info(f"{emoji} {site_name}: {players_online:,}명")
+                    logger.info(f"{emoji} {site_name}: {players_online:,}명 (현금: {cash_players:,})")
                     
                 except Exception as e:
-                    logger.error(f"❌ 행 파싱 오류: {str(e)}")
+                    logger.error(f"❌ 행 {i+1} 파싱 오류: {str(e)}")
                     continue
             
             logger.info(f"🎯 크롤링 완료: {len(collected_data)}개 사이트")
