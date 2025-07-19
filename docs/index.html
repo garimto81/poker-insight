@@ -68,7 +68,22 @@
             border-color: #3498db;
         }
         .chart-wrapper { position: relative; height: 400px; }
-        .gg-highlight { border-left: 4px solid #e74c3c; }
+        .gg-highlight { 
+            border-left: 4px solid #e74c3c; 
+            position: relative;
+        }
+        .gg-highlight::before {
+            content: "GG";
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
         .last-updated { 
             text-align: center; color: #7f8c8d; 
             font-size: 0.9em; margin-top: 20px; 
@@ -78,24 +93,24 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 GG POKER 모니터링 대시보드 v1.2.2</h1>
-            <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트</p>
+            <h1>온라인 포커 사이트 분석 v1.2.2</h1>
+            <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트 • 글로벌 포커 네트워크 모니터링</p>
         </div>
         
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number">57</div>
-                <div class="stat-label">모니터링 사이트</div>
+                <div class="stat-label">분석 대상 사이트</div>
             </div>
             <div class="stat-card gg-highlight">
                 <div class="stat-number">1,653</div>
-                <div class="stat-label">현재 총 플레이어</div>
+                <div class="stat-label">전체 접속자 수</div>
             </div>
         </div>
         
         <div class="chart-container">
             <div class="chart-header">
-                <h3>👥 온라인 플레이어 Top 5</h3>
+                <h3>[실시간] 온라인 플레이어 Top 5</h3>
                 <div class="period-selector">
                     <button class="period-btn active" data-period="7d" data-chart="onlinePlayersChart">7일</button>
                     <button class="period-btn" data-period="1m" data-chart="onlinePlayersChart">1개월</button>
@@ -111,7 +126,7 @@
         
         <div class="chart-container">
             <div class="chart-header">
-                <h3>💰 캐시 플레이어 Top 5</h3>
+                <h3>[캐시게임] 캐시 플레이어 Top 5</h3>
                 <div class="period-selector">
                     <button class="period-btn active" data-period="7d" data-chart="cashPlayersChart">7일</button>
                     <button class="period-btn" data-period="1m" data-chart="cashPlayersChart">1개월</button>
@@ -127,7 +142,7 @@
         
         <div class="chart-container">
             <div class="chart-header">
-                <h3>🔥 24시간 피크 Top 5</h3>
+                <h3>[피크타임] 24시간 피크 Top 5</h3>
                 <div class="period-selector">
                     <button class="period-btn active" data-period="7d" data-chart="peak24hChart">7일</button>
                     <button class="period-btn" data-period="1m" data-chart="peak24hChart">1개월</button>
@@ -143,7 +158,7 @@
         
         <div class="chart-container">
             <div class="chart-header">
-                <h3>📊 7일 평균 Top 5</h3>
+                <h3>[주간평균] 7일 평균 Top 5</h3>
                 <div class="period-selector">
                     <button class="period-btn active" data-period="7d" data-chart="sevenDayAvgChart">7일</button>
                     <button class="period-btn" data-period="1m" data-chart="sevenDayAvgChart">1개월</button>
@@ -270,7 +285,7 @@
             
             const top5 = getTop5Sites(dataType, period);
             
-            const labels = top5.map(site => site.name);
+            const labels = top5.map(site => site.isGG ? `${site.name} [GG]` : site.name);
             const data = top5.map(site => site.value);
             const colors = top5.map(site => site.isGG ? '#e74c3c' : '#3498db');
             
@@ -283,7 +298,8 @@
                         data: data,
                         backgroundColor: colors,
                         borderColor: colors,
-                        borderWidth: 1
+                        borderWidth: 2,
+                        borderSkipped: false
                     }]
                 },
                 options: {
