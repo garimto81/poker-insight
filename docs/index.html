@@ -37,6 +37,36 @@
             background: white; padding: 20px; border-radius: 10px; 
             margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .chart-header h3 {
+            margin: 0;
+        }
+        .period-selector {
+            display: flex;
+            gap: 5px;
+        }
+        .period-btn {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .period-btn:hover {
+            background: #f0f0f0;
+        }
+        .period-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
         .chart-wrapper { position: relative; height: 400px; }
         .gg-highlight { border-left: 4px solid #e74c3c; }
         .last-updated { 
@@ -48,7 +78,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 GG POKER 모니터링 대시보드 v1.1.1</h1>
+            <h1>🎯 GG POKER 모니터링 대시보드 v1.2.0</h1>
             <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트</p>
         </div>
         
@@ -72,28 +102,64 @@
         </div>
         
         <div class="chart-container">
-            <h3>👥 온라인 플레이어 Top 10</h3>
+            <div class="chart-header">
+                <h3>👥 온라인 플레이어 Top 10</h3>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7d" data-chart="onlinePlayersChart">7일</button>
+                    <button class="period-btn" data-period="1m" data-chart="onlinePlayersChart">1개월</button>
+                    <button class="period-btn" data-period="3m" data-chart="onlinePlayersChart">3개월</button>
+                    <button class="period-btn" data-period="6m" data-chart="onlinePlayersChart">6개월</button>
+                    <button class="period-btn" data-period="1y" data-chart="onlinePlayersChart">1년</button>
+                </div>
+            </div>
             <div class="chart-wrapper">
                 <canvas id="onlinePlayersChart"></canvas>
             </div>
         </div>
         
         <div class="chart-container">
-            <h3>💰 캐시 플레이어 Top 10</h3>
+            <div class="chart-header">
+                <h3>💰 캐시 플레이어 Top 10</h3>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7d" data-chart="cashPlayersChart">7일</button>
+                    <button class="period-btn" data-period="1m" data-chart="cashPlayersChart">1개월</button>
+                    <button class="period-btn" data-period="3m" data-chart="cashPlayersChart">3개월</button>
+                    <button class="period-btn" data-period="6m" data-chart="cashPlayersChart">6개월</button>
+                    <button class="period-btn" data-period="1y" data-chart="cashPlayersChart">1년</button>
+                </div>
+            </div>
             <div class="chart-wrapper">
                 <canvas id="cashPlayersChart"></canvas>
             </div>
         </div>
         
         <div class="chart-container">
-            <h3>🔥 24시간 피크 Top 10</h3>
+            <div class="chart-header">
+                <h3>🔥 24시간 피크 Top 10</h3>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7d" data-chart="peak24hChart">7일</button>
+                    <button class="period-btn" data-period="1m" data-chart="peak24hChart">1개월</button>
+                    <button class="period-btn" data-period="3m" data-chart="peak24hChart">3개월</button>
+                    <button class="period-btn" data-period="6m" data-chart="peak24hChart">6개월</button>
+                    <button class="period-btn" data-period="1y" data-chart="peak24hChart">1년</button>
+                </div>
+            </div>
             <div class="chart-wrapper">
                 <canvas id="peak24hChart"></canvas>
             </div>
         </div>
         
         <div class="chart-container">
-            <h3>📊 7일 평균 Top 10</h3>
+            <div class="chart-header">
+                <h3>📊 7일 평균 Top 10</h3>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7d" data-chart="sevenDayAvgChart">7일</button>
+                    <button class="period-btn" data-period="1m" data-chart="sevenDayAvgChart">1개월</button>
+                    <button class="period-btn" data-period="3m" data-chart="sevenDayAvgChart">3개월</button>
+                    <button class="period-btn" data-period="6m" data-chart="sevenDayAvgChart">6개월</button>
+                    <button class="period-btn" data-period="1y" data-chart="sevenDayAvgChart">1년</button>
+                </div>
+            </div>
             <div class="chart-wrapper">
                 <canvas id="sevenDayAvgChart"></canvas>
             </div>
@@ -117,34 +183,80 @@
             }
         }
         
+        // 전역 변수로 dashboardData 선언
+        let dashboardData;
+        
         // 메인 초기화 함수
         async function initializeDashboard() {
-            const dashboardData = await loadDashboardData();
+            dashboardData = await loadDashboardData();
         
-        // 공통 함수: 데이터별 상위 10개 사이트 추출
-        function getTop10Sites(dataType) {
+        // 글로벌 변수
+        let chartInstances = {};
+        
+        // 기간별 데이터 필터링 함수
+        function filterDataByPeriod(siteData, period) {
+            const dates = siteData.dates;
+            const dataLength = dates.length;
+            
+            let startIndex = 0;
+            const now = new Date();
+            
+            switch(period) {
+                case '7d':
+                    startIndex = Math.max(0, dataLength - 7);
+                    break;
+                case '1m':
+                    startIndex = Math.max(0, dataLength - 30);
+                    break;
+                case '3m':
+                    startIndex = Math.max(0, dataLength - 90);
+                    break;
+                case '6m':
+                    startIndex = Math.max(0, dataLength - 180);
+                    break;
+                case '1y':
+                    startIndex = Math.max(0, dataLength - 365);
+                    break;
+                default:
+                    startIndex = Math.max(0, dataLength - 7);
+            }
+            
+            return {
+                dates: dates.slice(startIndex),
+                players_online: siteData.players_online.slice(startIndex),
+                cash_players: siteData.cash_players.slice(startIndex),
+                peak_24h: siteData.peak_24h.slice(startIndex),
+                seven_day_avg: siteData.seven_day_avg.slice(startIndex)
+            };
+        }
+        
+        // 공통 함수: 데이터별 상위 10개 사이트 추출 (기간 필터링 포함)
+        function getTop10Sites(dataType, period = '7d') {
             const sites = Object.keys(dashboardData.sites).map(siteName => {
                 const siteData = dashboardData.sites[siteName];
+                const filteredData = filterDataByPeriod(siteData.data, period);
                 let value = 0;
                 
                 switch(dataType) {
                     case 'players_online':
-                        value = siteData.data.players_online[siteData.data.players_online.length - 1] || 0;
+                        // 기간 내 평균값 계산
+                        value = filteredData.players_online.reduce((sum, val) => sum + (val || 0), 0) / filteredData.players_online.length || 0;
                         break;
                     case 'cash_players':
-                        value = siteData.data.cash_players[siteData.data.cash_players.length - 1] || 0;
+                        value = filteredData.cash_players.reduce((sum, val) => sum + (val || 0), 0) / filteredData.cash_players.length || 0;
                         break;
                     case 'peak_24h':
-                        value = siteData.data.peak_24h[siteData.data.peak_24h.length - 1] || 0;
+                        // 기간 내 최대값
+                        value = Math.max(...filteredData.peak_24h.filter(val => val !== undefined && val !== null)) || 0;
                         break;
                     case 'seven_day_avg':
-                        value = siteData.data.seven_day_avg[siteData.data.seven_day_avg.length - 1] || 0;
+                        value = filteredData.seven_day_avg.reduce((sum, val) => sum + (val || 0), 0) / filteredData.seven_day_avg.length || 0;
                         break;
                 }
                 
                 return {
                     name: siteName,
-                    value: value,
+                    value: Math.round(value),
                     isGG: siteData.category === 'GG_POKER'
                 };
             });
@@ -156,15 +268,21 @@
         }
         
         // 공통 함수: 차트 생성
-        function createBarChart(canvasId, title, dataType) {
+        function createBarChart(canvasId, title, dataType, period = '7d') {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            const top10 = getTop10Sites(dataType);
+            
+            // 기존 차트 인스턴스 제거
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+            
+            const top10 = getTop10Sites(dataType, period);
             
             const labels = top10.map(site => site.name);
             const data = top10.map(site => site.value);
             const colors = top10.map(site => site.isGG ? '#e74c3c' : '#3498db');
             
-            new Chart(ctx, {
+            chartInstances[canvasId] = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
@@ -205,11 +323,41 @@
             const lastUpdated = new Date(dashboardData.last_updated).toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
             document.querySelector('.last-updated').textContent = `마지막 업데이트: ${lastUpdated}`;
             
-            // 4개 차트 생성
-            createBarChart('onlinePlayersChart', 'Online Players', 'players_online');
-            createBarChart('cashPlayersChart', 'Cash Players', 'cash_players');
-            createBarChart('peak24hChart', '24H Peak', 'peak_24h');
-            createBarChart('sevenDayAvgChart', '7-Day Average', 'seven_day_avg');
+            // 4개 차트 생성 (기본 7일)
+            createBarChart('onlinePlayersChart', 'Online Players', 'players_online', '7d');
+            createBarChart('cashPlayersChart', 'Cash Players', 'cash_players', '7d');
+            createBarChart('peak24hChart', '24H Peak', 'peak_24h', '7d');
+            createBarChart('sevenDayAvgChart', '7-Day Average', 'seven_day_avg', '7d');
+            
+            // 기간 선택 버튼 이벤트 리스너 추가
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const period = this.dataset.period;
+                    const chartId = this.dataset.chart;
+                    
+                    // 같은 차트의 다른 버튼들에서 active 클래스 제거
+                    this.parentElement.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    // 현재 버튼에 active 클래스 추가
+                    this.classList.add('active');
+                    
+                    // 해당 차트 업데이트
+                    const dataTypeMap = {
+                        'onlinePlayersChart': 'players_online',
+                        'cashPlayersChart': 'cash_players',
+                        'peak24hChart': 'peak_24h',
+                        'sevenDayAvgChart': 'seven_day_avg'
+                    };
+                    
+                    const titleMap = {
+                        'onlinePlayersChart': 'Online Players',
+                        'cashPlayersChart': 'Cash Players',
+                        'peak24hChart': '24H Peak',
+                        'sevenDayAvgChart': '7-Day Average'
+                    };
+                    
+                    createBarChart(chartId, titleMap[chartId], dataTypeMap[chartId], period);
+                });
+            });
         }
         
         // 페이지 로드 시 대시보드 초기화
