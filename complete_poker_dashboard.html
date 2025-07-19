@@ -1,0 +1,341 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포커 사이트 완전 모니터링 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh;
+        }
+        .dashboard { 
+            max-width: 1400px; margin: 0 auto; 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white; padding: 30px; text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 2.5em; font-weight: 300; }
+        .header p { margin: 10px 0 0 0; opacity: 0.9; }
+        
+        .stats-bar {
+            display: flex; background: #34495e; color: white; padding: 20px;
+        }
+        .stat-item {
+            flex: 1; text-align: center; padding: 0 20px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-number { font-size: 2em; font-weight: bold; color: #3498db; }
+        .stat-label { font-size: 0.9em; opacity: 0.8; }
+        
+        .main-content { display: flex; }
+        .tabs-section { flex: 1; padding: 0; }
+        .events-sidebar { 
+            width: 350px; background: #ecf0f1; padding: 20px; 
+            border-left: 1px solid #bdc3c7; max-height: 600px; overflow-y: auto;
+        }
+        
+        .tabs { 
+            display: flex; background: #2c3e50; margin: 0;
+        }
+        .tab { 
+            padding: 15px 25px; cursor: pointer; background: #34495e; 
+            border: none; font-size: 14px; color: white; flex: 1; text-align: center;
+            transition: all 0.3s;
+        }
+        .tab:hover { background: #3498db; }
+        .tab.active { background: #e74c3c; }
+        
+        .chart-container { 
+            background: white; padding: 30px; min-height: 600px;
+        }
+        .chart-wrapper { position: relative; height: 500px; }
+        
+        .event-item {
+            margin: 10px 0; padding: 15px; border-radius: 8px; 
+            background: white; border-left: 4px solid #3498db;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .event-title { font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+        .event-meta { font-size: 0.8em; color: #7f8c8d; }
+        .event-sites { margin-top: 8px; }
+        .site-tag { 
+            display: inline-block; background: #3498db; color: white; 
+            padding: 2px 8px; border-radius: 12px; font-size: 0.7em; margin: 2px;
+        }
+        
+        .high-impact { border-left-color: #e74c3c; }
+        .medium-impact { border-left-color: #f39c12; }
+        .low-impact { border-left-color: #27ae60; }
+        
+        h2 { color: #2c3e50; margin-bottom: 20px; font-weight: 300; }
+        h3 { color: #34495e; margin-bottom: 15px; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>🎯 포커 사이트 완전 모니터링 대시보드</h1>
+            <p>실시간 트래픽 분석 • 이벤트 통합 • 경쟁사 모니터링</p>
+        </div>
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">0</div>
+                <div class="stat-label">총 이벤트</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0</div>
+                <div class="stat-label">고임팩트 이벤트</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0</div>
+                <div class="stat-label">토너먼트</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0</div>
+                <div class="stat-label">프로모션</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="tabs-section">
+                <div class="tabs">
+                    <button class="tab active" onclick="showChart('multi_line')">📈 트렌드+이벤트</button>
+                    <button class="tab" onclick="showChart('radar')">🎯 현재 비교</button>
+                    <button class="tab" onclick="showChart('heatmap')">🔥 변화 히트맵</button>
+                    <button class="tab" onclick="showChart('bubble')">💭 4차원 분석</button>
+                    <button class="tab" onclick="showChart('stacked_bar')">📊 시장 점유율</button>
+                </div>
+                
+                <div class="chart-container">
+                    <div id="chart-multi_line" class="chart-content">
+                        <h2>📈 포커 사이트 트렌드 분석 + 이벤트 통합</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="multiLineChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div id="chart-radar" class="chart-content" style="display:none;">
+                        <h2>🎯 포커 사이트 현재 상태 비교</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div id="chart-heatmap" class="chart-content" style="display:none;">
+                        <h2>🔥 포커 사이트 일별 변화율 히트맵</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="heatmapChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div id="chart-bubble" class="chart-content" style="display:none;">
+                        <h2>💭 포커 사이트 4차원 분석</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="bubbleChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div id="chart-stacked_bar" class="chart-content" style="display:none;">
+                        <h2>📊 포커 사이트 시장 점유율 추이</h2>
+                        <div class="chart-wrapper">
+                            <canvas id="stackedBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="events-sidebar">
+                <h3>📅 최근 이벤트</h3>
+                <div id="eventsList">
+                    <div class="event-item">최근 이벤트가 없습니다.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chartData = {"multi_line": {"chart_type": "multi_line_enhanced", "title": "포커 사이트 트렌드 분석 (이벤트 통합)", "dates": ["2025-07-19"], "sites": {"888poker": {"players_online": [1850], "cash_players": [420], "peak_24h": [2100], "seven_day_avg": [1900], "point_styles": [{"radius": 3, "backgroundColor": "default", "borderColor": "default", "borderWidth": 1}]}, "Chico Poker": {"players_online": [2253], "cash_players": [671], "peak_24h": [2500], "seven_day_avg": [2100], "point_styles": [{"radius": 3, "backgroundColor": "default", "borderColor": "default", "borderWidth": 1}]}, "PokerStars": {"players_online": [55540], "cash_players": [1397], "peak_24h": [62000], "seven_day_avg": [58000], "point_styles": [{"radius": 3, "backgroundColor": "default", "borderColor": "default", "borderWidth": 1}]}, "PokerStars Ontario": {"players_online": [55540], "cash_players": [0], "peak_24h": [60000], "seven_day_avg": [55000], "point_styles": [{"radius": 3, "backgroundColor": "default", "borderColor": "default", "borderWidth": 1}]}, "WPT Global": {"players_online": [2989], "cash_players": [1596], "peak_24h": [3500], "seven_day_avg": [2800], "point_styles": [{"radius": 3, "backgroundColor": "default", "borderColor": "default", "borderWidth": 1}]}}, "events": {"point_events": [], "period_events": []}, "annotations": []}, "radar": {"chart_type": "radar", "title": "포커 사이트 현재 상태 비교", "metrics": ["Players Online", "Cash Players", "24h Peak", "7-day Average"], "sites": [{"name": "PokerStars", "data": [100.0, 87.531328320802, 100.0, 100.0], "raw_data": [55540, 1397, 62000, 58000]}, {"name": "PokerStars Ontario", "data": [100.0, 0.0, 96.7741935483871, 94.82758620689656], "raw_data": [55540, 0, 60000, 55000]}, {"name": "WPT Global", "data": [5.3817068779258195, 100.0, 5.64516129032258, 4.827586206896552], "raw_data": [2989, 1596, 3500, 2800]}, {"name": "Chico Poker", "data": [4.056535830032408, 42.042606516290725, 4.032258064516129, 3.620689655172414], "raw_data": [2253, 671, 2500, 2100]}, {"name": "888poker", "data": [3.330932661145121, 26.31578947368421, 3.387096774193549, 3.2758620689655173], "raw_data": [1850, 420, 2100, 1900]}], "max_values": {"players_online": 55540, "cash_players": 1596, "peak_24h": 62000, "seven_day_avg": 58000}}, "heatmap": {"chart_type": "heatmap", "title": "포커 사이트 일별 변화율 히트맵", "dates": [], "sites": [], "data": []}, "bubble": {"chart_type": "bubble", "title": "포커 사이트 4차원 분석 (최근 7일)", "datasets": [{"label": "PokerStars", "data": [{"date": "2025-07-19", "x": 55540, "y": 1397, "r": 62.0, "avg": 58000}], "backgroundColor": "#FF6384", "borderColor": "#FF6384"}, {"label": "PokerStars Ontario", "data": [{"date": "2025-07-19", "x": 55540, "y": 0, "r": 60.0, "avg": 55000}], "backgroundColor": "#36A2EB", "borderColor": "#36A2EB"}, {"label": "WPT Global", "data": [{"date": "2025-07-19", "x": 2989, "y": 1596, "r": 3.5, "avg": 2800}], "backgroundColor": "#FFCE56", "borderColor": "#FFCE56"}, {"label": "888poker", "data": [{"date": "2025-07-19", "x": 1850, "y": 420, "r": 2.1, "avg": 1900}], "backgroundColor": "#4BC0C0", "borderColor": "#4BC0C0"}, {"label": "Chico Poker", "data": [{"date": "2025-07-19", "x": 2253, "y": 671, "r": 2.5, "avg": 2100}], "backgroundColor": "#9966FF", "borderColor": "#9966FF"}]}, "stacked_bar": {"chart_type": "stacked_bar_enhanced", "title": "포커 사이트 시장 점유율 추이 (이벤트 포함)", "dates": ["2025-07-19"], "sites": ["888poker", "Chico Poker", "PokerStars", "PokerStars Ontario", "WPT Global"], "datasets": [{"label": "888poker", "data": [1850], "backgroundColor": "#FF6384", "borderColor": "#FF6384", "borderWidth": 1}, {"label": "Chico Poker", "data": [2253], "backgroundColor": "#36A2EB", "borderColor": "#36A2EB", "borderWidth": 1}, {"label": "PokerStars", "data": [55540], "backgroundColor": "#FFCE56", "borderColor": "#FFCE56", "borderWidth": 1}, {"label": "PokerStars Ontario", "data": [55540], "backgroundColor": "#4BC0C0", "borderColor": "#4BC0C0", "borderWidth": 1}, {"label": "WPT Global", "data": [2989], "backgroundColor": "#9966FF", "borderColor": "#9966FF", "borderWidth": 1}], "events": {"point_events": [], "period_events": []}}};
+        const eventData = {"total_events": 0, "high_impact_events": 0, "tournament_events": 0, "promotion_events": 0, "recent_events": [], "timeline": []};
+        
+        let charts = {};
+        
+        function showChart(chartType) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.chart-content').forEach(content => content.style.display = 'none');
+            document.getElementById('chart-' + chartType).style.display = 'block';
+            
+            if (!charts[chartType]) {
+                createChart(chartType);
+            }
+        }
+        
+        function createChart(chartType) {
+            const data = chartData[chartType];
+            
+            switch(chartType) {
+                case 'multi_line':
+                    createEnhancedMultiLineChart(data);
+                    break;
+                case 'radar':
+                    createRadarChart(data);
+                    break;
+                case 'heatmap':
+                    createHeatmapChart(data);
+                    break;
+                case 'bubble':
+                    createBubbleChart(data);
+                    break;
+                case 'stacked_bar':
+                    createStackedBarChart(data);
+                    break;
+            }
+        }
+        
+        function createEnhancedMultiLineChart(data) {
+            const ctx = document.getElementById('multiLineChart').getContext('2d');
+            const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+            
+            const datasets = [];
+            let colorIndex = 0;
+            
+            Object.keys(data.sites).forEach(site => {
+                datasets.push({
+                    label: site + ' (Players Online)',
+                    data: data.sites[site].players_online,
+                    borderColor: colors[colorIndex % colors.length],
+                    backgroundColor: colors[colorIndex % colors.length] + '20',
+                    fill: false,
+                    tension: 0.1,
+                    pointRadius: data.sites[site].point_styles ? 
+                        data.sites[site].point_styles.map(s => s.radius) : 3
+                });
+                colorIndex++;
+            });
+            
+            charts.multi_line = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { 
+                            display: true, 
+                            text: 'Players Online 트렌드 (이벤트 표시)',
+                            font: { size: 16 }
+                        },
+                        legend: { position: 'top' },
+                        annotation: {
+                            annotations: data.annotations || []
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'Players Count' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+        
+        function createRadarChart(data) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
+            
+            const datasets = data.sites.slice(0, 5).map((site, index) => ({
+                label: site.name,
+                data: site.data,
+                borderColor: colors[index],
+                backgroundColor: colors[index] + '40',
+                pointBackgroundColor: colors[index],
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: colors[index]
+            }));
+            
+            charts.radar = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: data.metrics,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createBubbleChart(data) {
+            const ctx = document.getElementById('bubbleChart').getContext('2d');
+            
+            charts.bubble = new Chart(ctx, {
+                type: 'bubble',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Players Online' } },
+                        y: { title: { display: true, text: 'Cash Players' } }
+                    }
+                }
+            });
+        }
+        
+        function createStackedBarChart(data) {
+            const ctx = document.getElementById('stackedBarChart').getContext('2d');
+            
+            charts.stacked_bar = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true }
+                    }
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            createChart('multi_line');
+        });
+    </script>
+</body>
+</html>
+        

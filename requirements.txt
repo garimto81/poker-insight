@@ -1,0 +1,18 @@
+# 기본 웹 크롤링
+cloudscraper==1.2.71
+beautifulsoup4==4.12.2
+requests==2.31.0
+lxml==4.9.3
+
+# 데이터베이스
+psycopg2-binary==2.9.7
+PyMySQL==1.1.0
+
+# 스케줄링
+schedule==1.2.0
+
+# 데이터 처리
+python-dateutil==2.8.2
+
+# 로깅 및 유틸리티
+python-dotenv==1.0.0
