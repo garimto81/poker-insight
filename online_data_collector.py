@@ -57,6 +57,7 @@ class OnlineDataCollector:
             # SQLite fallback이 활성화된 경우
             if self.use_sqlite_fallback:
                 logger.info("🔄 SQLite fallback 모드 사용")
+                import sqlite3
                 return sqlite3.connect('github_actions_fallback.db')
             
             if DB_TYPE == 'postgresql':
@@ -117,7 +118,7 @@ class OnlineDataCollector:
             cursor = conn.cursor()
             
             # PostgreSQL/MySQL용 SQL (SQLite fallback이 아닌 경우)
-            if DB_TYPE in ['postgresql', 'mysql'] and not self.use_sqlite_fallback:
+            if not self.use_sqlite_fallback and DB_TYPE in ['postgresql', 'mysql']:
                 sql_commands = [
                     """
                     CREATE TABLE IF NOT EXISTS daily_traffic (
@@ -329,7 +330,7 @@ class OnlineDataCollector:
             
             for site_data in data:
                 try:
-                    if DB_TYPE in ['postgresql', 'mysql'] and not self.use_sqlite_fallback:
+                    if not self.use_sqlite_fallback and DB_TYPE in ['postgresql', 'mysql']:
                         sql = """
                         INSERT INTO daily_traffic 
                         (site_name, collection_date, collection_time, players_online, 
@@ -371,7 +372,7 @@ class OnlineDataCollector:
                     logger.error(f"❌ {site_data['site_name']} 저장 실패: {str(e)}")
             
             # 수집 통계 저장
-            if DB_TYPE in ['postgresql', 'mysql'] and not self.use_sqlite_fallback:
+            if not self.use_sqlite_fallback and DB_TYPE in ['postgresql', 'mysql']:
                 stats_sql = """
                 INSERT INTO collection_stats 
                 (collection_date, collection_time, total_sites, gg_poker_sites, total_players)
