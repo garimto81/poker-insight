@@ -167,7 +167,16 @@ class DashboardUpdater:
             return False
     
     def generate_web_dashboard(self, dashboard_data):
-        """웹 대시보드 HTML 생성"""
+        """웹 대시보드 HTML 생성 - 기존 index.html을 덮어쓰지 않음"""
+        try:
+            # 기존 index.html을 유지하고 API 데이터만 업데이트
+            logger.info("✅ 기존 index.html 유지, API 데이터만 업데이트")
+            return True  # 실제 HTML 생성 건너뛰기
+        except Exception as e:
+            logger.error(f"❌ 대시보드 보존 실패: {str(e)}")
+            return False
+        
+        # 아래 코드는 실행되지 않음 (기존 HTML 템플릿 코드)
         html_template = f"""
 <!DOCTYPE html>
 <html lang="ko">

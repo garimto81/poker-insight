@@ -37,6 +37,36 @@
             background: white; padding: 20px; border-radius: 10px; 
             margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .chart-header h3 {
+            margin: 0;
+        }
+        .period-selector {
+            display: flex;
+            gap: 5px;
+        }
+        .period-btn {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .period-btn:hover {
+            background: #f0f0f0;
+        }
+        .period-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
         .chart-wrapper { position: relative; height: 400px; }
         .gg-highlight { border-left: 4px solid #e74c3c; }
         .last-updated { 
@@ -48,7 +78,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 GG POKER 모니터링 대시보드</h1>
+            <h1>🎯 GG POKER 모니터링 대시보드 v1.2.2</h1>
             <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트</p>
         </div>
         
@@ -58,11 +88,11 @@
                 <div class="stat-label">GG POKER 사이트</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">46</div>
+                <div class="stat-number">57</div>
                 <div class="stat-label">모니터링 사이트</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">281,028</div>
+                <div class="stat-number">1,653</div>
                 <div class="stat-label">현재 총 플레이어</div>
             </div>
             <div class="stat-card">
@@ -72,106 +102,266 @@
         </div>
         
         <div class="chart-container">
-            <h3>📈 사이트별 플레이어 트렌드</h3>
+            <div class="chart-header">
+                <h3>👥 온라인 플레이어 Top 10</h3>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7d" data-chart="onlinePlayersChart">7일</button>
+                    <button class="period-btn" data-period="1m" data-chart="onlinePlayersChart">1개월</button>
+                    <button class="period-btn" data-period="3m" data-chart="onlinePlayersChart">3개월</button>
+                    <button class="period-btn" data-period="6m" data-chart="onlinePlayersChart">6개월</button>
+                    <button class="period-btn" data-period="1y" data-chart="onlinePlayersChart">1년</button>
+                </div>
+            </div>
             <div class="chart-wrapper">
-                <canvas id="trendChart"></canvas>
+                <canvas id="onlinePlayersChart"></canvas>
             </div>
         </div>
         
         <div class="chart-container">
-            <h3>🎯 현재 사이트 현황</h3>
+            <div class="chart-header">
+                <h3>💰 캐시 플레이어 Top 10</h3>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7d" data-chart="cashPlayersChart">7일</button>
+                    <button class="period-btn" data-period="1m" data-chart="cashPlayersChart">1개월</button>
+                    <button class="period-btn" data-period="3m" data-chart="cashPlayersChart">3개월</button>
+                    <button class="period-btn" data-period="6m" data-chart="cashPlayersChart">6개월</button>
+                    <button class="period-btn" data-period="1y" data-chart="cashPlayersChart">1년</button>
+                </div>
+            </div>
             <div class="chart-wrapper">
-                <canvas id="currentChart"></canvas>
+                <canvas id="cashPlayersChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>🔥 24시간 피크 Top 10</h3>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7d" data-chart="peak24hChart">7일</button>
+                    <button class="period-btn" data-period="1m" data-chart="peak24hChart">1개월</button>
+                    <button class="period-btn" data-period="3m" data-chart="peak24hChart">3개월</button>
+                    <button class="period-btn" data-period="6m" data-chart="peak24hChart">6개월</button>
+                    <button class="period-btn" data-period="1y" data-chart="peak24hChart">1년</button>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="peak24hChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>📊 7일 평균 Top 10</h3>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7d" data-chart="sevenDayAvgChart">7일</button>
+                    <button class="period-btn" data-period="1m" data-chart="sevenDayAvgChart">1개월</button>
+                    <button class="period-btn" data-period="3m" data-chart="sevenDayAvgChart">3개월</button>
+                    <button class="period-btn" data-period="6m" data-chart="sevenDayAvgChart">6개월</button>
+                    <button class="period-btn" data-period="1y" data-chart="sevenDayAvgChart">1년</button>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="sevenDayAvgChart"></canvas>
             </div>
         </div>
         
         <div class="last-updated">
-            마지막 업데이트: 2025-07-20 01:10:35 UTC
+            마지막 업데이트: 2025-07-20 00:03:03 UTC
         </div>
     </div>
 
     <script>
-        const dashboardData = {"last_updated": "2025-07-20T01:10:35.905485", "data_period_days": 30, "sites": {"888poker": {"name": "888poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [218], "peak_24h": [865], "seven_day_avg": [400]}}, "9stacks": {"name": "9stacks", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [5], "cash_players": [0], "peak_24h": [0], "seven_day_avg": [0]}}, "A23 Poker": {"name": "A23 Poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [250], "seven_day_avg": [120]}}, "Aconcagua Poker": {"name": "Aconcagua Poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [2], "cash_players": [0], "peak_24h": [0], "seven_day_avg": [0]}}, "AconcaguaPoker.es": {"name": "AconcaguaPoker.es", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [20], "cash_players": [9], "peak_24h": [41], "seven_day_avg": [16]}}, "Adda52": {"name": "Adda52", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [54], "peak_24h": [54], "seven_day_avg": [0]}}, "Adjarabet": {"name": "Adjarabet", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [25], "seven_day_avg": [10]}}, "BetMGM ON": {"name": "BetMGM ON", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [96], "peak_24h": [139], "seven_day_avg": [0]}}, "BetMGM PA": {"name": "BetMGM PA", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [22], "peak_24h": [26], "seven_day_avg": [9]}}, "Blockchain Poker": {"name": "Blockchain Poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [66], "cash_players": [0], "peak_24h": [0], "seven_day_avg": [0]}}, "Bunga365": {"name": "Bunga365", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [110], "seven_day_avg": [45]}}, "Chico Poker": {"name": "Chico Poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [2253], "cash_players": [671], "peak_24h": [671], "seven_day_avg": [375]}}, "GGNetwork": {"name": "GGNetwork", "category": "GG_POKER", "data": {"dates": ["2025-07-20"], "players_online": [134304], "cash_players": [5242], "peak_24h": [5242], "seven_day_avg": [10500]}}, "GGPoker ON": {"name": "GGPoker ON", "category": "GG_POKER", "data": {"dates": ["2025-07-20"], "players_online": [4693], "cash_players": [563], "peak_24h": [625], "seven_day_avg": [350]}}, "Gamezy": {"name": "Gamezy", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [325], "seven_day_avg": [160]}}, "Khelo365": {"name": "Khelo365", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [15], "cash_players": [0], "peak_24h": [28], "seven_day_avg": [7]}}, "MPL Poker": {"name": "MPL Poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [900], "seven_day_avg": [525]}}, "Merge Gaming": {"name": "Merge Gaming", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [20], "seven_day_avg": [10]}}, "MobilePokerClub": {"name": "MobilePokerClub", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [55], "seven_day_avg": [20]}}, "OK Poker": {"name": "OK Poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [8], "peak_24h": [8], "seven_day_avg": [120]}}, "PaiWangLuo (Bodog)": {"name": "PaiWangLuo (Bodog)", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [1500], "seven_day_avg": [800]}}, "Party Borgata (NJ)": {"name": "Party Borgata (NJ)", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [18], "peak_24h": [18], "seven_day_avg": [18]}}, "PeoplesNetwork.it": {"name": "PeoplesNetwork.it", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [201], "cash_players": [21], "peak_24h": [134], "seven_day_avg": [55]}}, "Pocket52": {"name": "Pocket52", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [300], "seven_day_avg": [150]}}, "PokerDangal": {"name": "PokerDangal", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [40], "seven_day_avg": [14]}}, "PokerKlas": {"name": "PokerKlas", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [515], "seven_day_avg": [280]}}, "PokerMatch": {"name": "PokerMatch", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [73], "cash_players": [25], "peak_24h": [137], "seven_day_avg": [75]}}, "PokerSaint": {"name": "PokerSaint", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [20], "seven_day_avg": [5]}}, "PokerStars": {"name": "PokerStars", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [55540], "cash_players": [1397], "peak_24h": [1397], "seven_day_avg": [0]}}, "PokerStars Ontario": {"name": "PokerStars Ontario", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [55540], "cash_players": [0], "peak_24h": [0], "seven_day_avg": [0]}}, "PokerStars PA": {"name": "PokerStars PA", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [220], "peak_24h": [220], "seven_day_avg": [85]}}, "PokerStars.it": {"name": "PokerStars.it", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [11145], "cash_players": [2], "peak_24h": [2], "seven_day_avg": [0]}}, "Pokerdom": {"name": "Pokerdom", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [694], "cash_players": [176], "peak_24h": [843], "seven_day_avg": [500]}}, "Pokio": {"name": "Pokio", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [3039], "cash_players": [0], "peak_24h": [0], "seven_day_avg": [0]}}, "Ray.fi": {"name": "Ray.fi", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [543], "cash_players": [256], "peak_24h": [476], "seven_day_avg": [0]}}, "Silver Sands": {"name": "Silver Sands", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [20], "seven_day_avg": [5]}}, "SkyPoker": {"name": "SkyPoker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [220], "seven_day_avg": [100]}}, "Stretch": {"name": "Stretch", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [332], "cash_players": [22], "peak_24h": [210], "seven_day_avg": [100]}}, "SwC Poker": {"name": "SwC Poker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [134], "cash_players": [13], "peak_24h": [13], "seven_day_avg": [16]}}, "Unibet": {"name": "Unibet", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [0], "peak_24h": [750], "seven_day_avg": [400]}}, "WPT Global": {"name": "WPT Global", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [2989], "cash_players": [1596], "peak_24h": [3478], "seven_day_avg": [2400]}}, "Winamax.fr": {"name": "Winamax.fr", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [1605], "cash_players": [0], "peak_24h": [0], "seven_day_avg": [0]}}, "iPoker": {"name": "iPoker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [4187], "cash_players": [1558], "peak_24h": [2555], "seven_day_avg": [0]}}, "iPoker Europe": {"name": "iPoker Europe", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [2036], "cash_players": [398], "peak_24h": [482], "seven_day_avg": [0]}}, "iPoker.it": {"name": "iPoker.it", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [1612], "cash_players": [596], "peak_24h": [809], "seven_day_avg": [0]}}, "partypoker": {"name": "partypoker", "category": "COMPETITOR", "data": {"dates": ["2025-07-20"], "players_online": [0], "cash_players": [833], "peak_24h": [855], "seven_day_avg": [0]}}}, "dates": ["2025-07-20"], "summary": {"total_sites": 46, "gg_poker_sites": 2, "latest_total_players": 281028, "data_points": 46}};
+        // 실제 서버 데이터를 동적으로 로드
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('./api_data.json');
+                return await response.json();
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+                // fallback data
+                return {"last_updated": "2025-07-20T00:03:03.309875", "data_period_days": 30, "sites": {}, "dates": ["2025-07-20"], "summary": {"total_sites": 0, "gg_poker_sites": 0, "latest_total_players": 0, "data_points": 0}};
+            }
+        }
         
-        // 트렌드 차트
-        const trendCtx = document.getElementById('trendChart').getContext('2d');
-        const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+        // 전역 변수로 dashboardData 선언
+        let dashboardData;
         
-        const trendDatasets = [];
-        let colorIndex = 0;
+        // 메인 초기화 함수
+        async function initializeDashboard() {
+            dashboardData = await loadDashboardData();
         
-        Object.keys(dashboardData.sites).forEach(siteName => {
-            const siteData = dashboardData.sites[siteName];
-            const isGG = siteData.category === 'GG_POKER';
+        // 글로벌 변수
+        let chartInstances = {};
+        
+        // 기간별 데이터 필터링 함수
+        function filterDataByPeriod(siteData, period) {
+            const dates = siteData.dates;
+            const dataLength = dates.length;
             
-            trendDatasets.push({
-                label: siteName,
-                data: siteData.data.players_online,
-                borderColor: colors[colorIndex % colors.length],
-                backgroundColor: colors[colorIndex % colors.length] + '20',
-                borderWidth: isGG ? 3 : 2,
-                fill: false,
-                tension: 0.1
+            let startIndex = 0;
+            const now = new Date();
+            
+            switch(period) {
+                case '7d':
+                    startIndex = Math.max(0, dataLength - 7);
+                    break;
+                case '1m':
+                    startIndex = Math.max(0, dataLength - 30);
+                    break;
+                case '3m':
+                    startIndex = Math.max(0, dataLength - 90);
+                    break;
+                case '6m':
+                    startIndex = Math.max(0, dataLength - 180);
+                    break;
+                case '1y':
+                    startIndex = Math.max(0, dataLength - 365);
+                    break;
+                default:
+                    startIndex = Math.max(0, dataLength - 7);
+            }
+            
+            return {
+                dates: dates.slice(startIndex),
+                players_online: siteData.players_online.slice(startIndex),
+                cash_players: siteData.cash_players.slice(startIndex),
+                peak_24h: siteData.peak_24h.slice(startIndex),
+                seven_day_avg: siteData.seven_day_avg.slice(startIndex)
+            };
+        }
+        
+        // 공통 함수: 데이터별 상위 10개 사이트 추출 (기간 필터링 포함)
+        function getTop10Sites(dataType, period = '7d') {
+            const sites = Object.keys(dashboardData.sites).map(siteName => {
+                const siteData = dashboardData.sites[siteName];
+                const filteredData = filterDataByPeriod(siteData.data, period);
+                let value = 0;
+                
+                switch(dataType) {
+                    case 'players_online':
+                        // 기간 내 평균값 계산
+                        value = filteredData.players_online.reduce((sum, val) => sum + (val || 0), 0) / filteredData.players_online.length || 0;
+                        break;
+                    case 'cash_players':
+                        value = filteredData.cash_players.reduce((sum, val) => sum + (val || 0), 0) / filteredData.cash_players.length || 0;
+                        break;
+                    case 'peak_24h':
+                        // 기간 내 최대값
+                        value = Math.max(...filteredData.peak_24h.filter(val => val !== undefined && val !== null)) || 0;
+                        break;
+                    case 'seven_day_avg':
+                        value = filteredData.seven_day_avg.reduce((sum, val) => sum + (val || 0), 0) / filteredData.seven_day_avg.length || 0;
+                        break;
+                }
+                
+                return {
+                    name: siteName,
+                    value: Math.round(value),
+                    isGG: siteData.category === 'GG_POKER'
+                };
             });
-            colorIndex++;
-        });
+            
+            return sites
+                .filter(site => site.value > 0)
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 10);
+        }
         
-        new Chart(trendCtx, {
-            type: 'line',
-            data: {
-                labels: dashboardData.dates,
-                datasets: trendDatasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top' }
+        // 공통 함수: 차트 생성
+        function createBarChart(canvasId, title, dataType, period = '7d') {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // 기존 차트 인스턴스 제거
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+            
+            const top10 = getTop10Sites(dataType, period);
+            
+            const labels = top10.map(site => site.name);
+            const data = top10.map(site => site.value);
+            const colors = top10.map(site => site.isGG ? '#e74c3c' : '#3498db');
+            
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 1
+                    }]
                 },
-                scales: {
-                    y: { beginAtZero: true }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
                 }
-            }
-        });
+            });
+        }
         
-        // 현재 상황 차트
-        const currentCtx = document.getElementById('currentChart').getContext('2d');
-        const currentLabels = [];
-        const currentData = [];
-        const currentColors = [];
+            // 통계 카드 업데이트
+            document.querySelector('.stat-card .stat-number').textContent = dashboardData.summary.gg_poker_sites;
+            document.querySelectorAll('.stat-card .stat-number')[1].textContent = dashboardData.summary.total_sites;
+            document.querySelectorAll('.stat-card .stat-number')[2].textContent = dashboardData.summary.latest_total_players.toLocaleString();
+            document.querySelectorAll('.stat-card .stat-number')[3].textContent = dashboardData.data_period_days;
+            
+            // 마지막 업데이트 시간 업데이트
+            const lastUpdated = new Date(dashboardData.last_updated).toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+            document.querySelector('.last-updated').textContent = `마지막 업데이트: ${lastUpdated}`;
+            
+            // 4개 차트 생성 (기본 7일)
+            createBarChart('onlinePlayersChart', 'Online Players', 'players_online', '7d');
+            createBarChart('cashPlayersChart', 'Cash Players', 'cash_players', '7d');
+            createBarChart('peak24hChart', '24H Peak', 'peak_24h', '7d');
+            createBarChart('sevenDayAvgChart', '7-Day Average', 'seven_day_avg', '7d');
+            
+            // 기간 선택 버튼 이벤트 리스너 추가
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const period = this.dataset.period;
+                    const chartId = this.dataset.chart;
+                    
+                    // 같은 차트의 다른 버튼들에서 active 클래스 제거
+                    this.parentElement.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    // 현재 버튼에 active 클래스 추가
+                    this.classList.add('active');
+                    
+                    // 해당 차트 업데이트
+                    const dataTypeMap = {
+                        'onlinePlayersChart': 'players_online',
+                        'cashPlayersChart': 'cash_players',
+                        'peak24hChart': 'peak_24h',
+                        'sevenDayAvgChart': 'seven_day_avg'
+                    };
+                    
+                    const titleMap = {
+                        'onlinePlayersChart': 'Online Players',
+                        'cashPlayersChart': 'Cash Players',
+                        'peak24hChart': '24H Peak',
+                        'sevenDayAvgChart': '7-Day Average'
+                    };
+                    
+                    createBarChart(chartId, titleMap[chartId], dataTypeMap[chartId], period);
+                });
+            });
+        }
         
-        Object.keys(dashboardData.sites).forEach((siteName, index) => {
-            const siteData = dashboardData.sites[siteName];
-            if (siteData.data.players_online.length > 0) {
-                currentLabels.push(siteName);
-                currentData.push(siteData.data.players_online[siteData.data.players_online.length - 1]);
-                currentColors.push(siteData.category === 'GG_POKER' ? '#e74c3c' : colors[index % colors.length]);
-            }
-        });
-        
-        new Chart(currentCtx, {
-            type: 'bar',
-            data: {
-                labels: currentLabels,
-                datasets: [{
-                    label: 'Players Online',
-                    data: currentData,
-                    backgroundColor: currentColors,
-                    borderColor: currentColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
+        // 페이지 로드 시 대시보드 초기화
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
     </script>
 </body>
 </html>
