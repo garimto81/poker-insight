@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 class OnlineDataCollector:
     def __init__(self):
         self.db_url = DATABASE_URL
+        self.use_sqlite_fallback = False  # SQLite fallback 플래그
         self.scraper = cloudscraper.create_scraper(
             browser={'browser': 'chrome', 'platform': 'linux', 'mobile': False}
         )
@@ -53,6 +54,11 @@ class OnlineDataCollector:
     def get_db_connection(self):
         """데이터베이스 연결"""
         try:
+            # SQLite fallback이 활성화된 경우
+            if self.use_sqlite_fallback:
+                logger.info("🔄 SQLite fallback 모드 사용")
+                return sqlite3.connect('github_actions_fallback.db')
+            
             if DB_TYPE == 'postgresql':
                 if not self.db_url:
                     raise ValueError("DATABASE_URL이 설정되지 않았습니다")
@@ -81,12 +87,17 @@ class OnlineDataCollector:
             # IPv6 네트워크 문제 감지 시 SQLite로 fallback
             if "Network is unreachable" in str(e) and 'supabase.co' in str(self.db_url):
                 logger.warning("🚨 Supabase IPv6 네트워크 문제 감지")
-                logger.warning("🔄 SQLite로 임시 fallback...")
+                logger.warning("🔄 SQLite fallback으로 자동 전환...")
+                
+                self.use_sqlite_fallback = True
                 try:
                     import sqlite3
-                    return sqlite3.connect('github_actions_fallback.db')
+                    conn = sqlite3.connect('github_actions_fallback.db')
+                    logger.info("✅ SQLite fallback 활성화 성공")
+                    return conn
                 except Exception as fallback_error:
-                    logger.error(f"SQLite fallback도 실패: {fallback_error}")
+                    logger.error(f"❌ SQLite fallback도 실패: {fallback_error}")
+                    raise fallback_error
             
             # 연결 문자열에서 민감정보 제거하여 로깅
             if self.db_url:
@@ -105,8 +116,8 @@ class OnlineDataCollector:
             conn = self.get_db_connection()
             cursor = conn.cursor()
             
-            # PostgreSQL/MySQL용 SQL
-            if DB_TYPE in ['postgresql', 'mysql']:
+            # PostgreSQL/MySQL용 SQL (SQLite fallback이 아닌 경우)
+            if DB_TYPE in ['postgresql', 'mysql'] and not self.use_sqlite_fallback:
                 sql_commands = [
                     """
                     CREATE TABLE IF NOT EXISTS daily_traffic (
@@ -318,7 +329,7 @@ class OnlineDataCollector:
             
             for site_data in data:
                 try:
-                    if DB_TYPE in ['postgresql', 'mysql']:
+                    if DB_TYPE in ['postgresql', 'mysql'] and not self.use_sqlite_fallback:
                         sql = """
                         INSERT INTO daily_traffic 
                         (site_name, collection_date, collection_time, players_online, 
@@ -360,7 +371,7 @@ class OnlineDataCollector:
                     logger.error(f"❌ {site_data['site_name']} 저장 실패: {str(e)}")
             
             # 수집 통계 저장
-            if DB_TYPE in ['postgresql', 'mysql']:
+            if DB_TYPE in ['postgresql', 'mysql'] and not self.use_sqlite_fallback:
                 stats_sql = """
                 INSERT INTO collection_stats 
                 (collection_date, collection_time, total_sites, gg_poker_sites, total_players)

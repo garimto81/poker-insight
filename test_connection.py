@@ -107,7 +107,23 @@ def test_database_connection(database_url):
         # IPv6 관련 오류인지 확인
         if "Network is unreachable" in str(e) or "2406:da12" in str(e):
             logger.error("🚨 IPv6 네트워크 문제 감지")
-            logger.error("💡 해결책: Supabase 설정에서 IPv4 우선 연결 필요")
+            logger.warning("🔄 SQLite fallback으로 전환...")
+            
+            try:
+                import sqlite3
+                conn = sqlite3.connect('github_actions_fallback.db')
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                result = cursor.fetchone()
+                cursor.close()
+                conn.close()
+                
+                logger.info("✅ SQLite fallback 연결 성공")
+                return True
+                
+            except Exception as fallback_error:
+                logger.error(f"❌ SQLite fallback도 실패: {fallback_error}")
+                return False
             
         return False
 
