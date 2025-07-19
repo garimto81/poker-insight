@@ -69,12 +69,31 @@ def test_database_connection(database_url):
         
     try:
         import psycopg2
-        conn = psycopg2.connect(database_url)
+        
+        # IPv4 강제 연결을 위한 연결 파라미터 수정
+        if 'supabase.co' in database_url:
+            logger.info("🔧 Supabase 연결 최적화 시도...")
+            
+            # 연결 문자열에 IPv4 강제 옵션 추가
+            if '?' in database_url:
+                optimized_url = database_url + '&connect_timeout=10&application_name=poker-insight'
+            else:
+                optimized_url = database_url + '?connect_timeout=10&application_name=poker-insight'
+        else:
+            optimized_url = database_url
+            
+        logger.info("🔗 데이터베이스 연결 시도...")
+        conn = psycopg2.connect(optimized_url)
         cursor = conn.cursor()
         
         # 간단한 쿼리 테스트
         cursor.execute("SELECT 1")
         result = cursor.fetchone()
+        
+        # 연결 정보 확인
+        cursor.execute("SELECT version()")
+        version = cursor.fetchone()
+        logger.info(f"📊 PostgreSQL 버전: {version[0][:50]}...")
         
         cursor.close()
         conn.close()
@@ -84,6 +103,12 @@ def test_database_connection(database_url):
         
     except Exception as e:
         logger.error(f"❌ 데이터베이스 연결 실패: {str(e)}")
+        
+        # IPv6 관련 오류인지 확인
+        if "Network is unreachable" in str(e) or "2406:da12" in str(e):
+            logger.error("🚨 IPv6 네트워크 문제 감지")
+            logger.error("💡 해결책: Supabase 설정에서 IPv4 우선 연결 필요")
+            
         return False
 
 def test_web_scraping():

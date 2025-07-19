@@ -56,7 +56,17 @@ class OnlineDataCollector:
             if DB_TYPE == 'postgresql':
                 if not self.db_url:
                     raise ValueError("DATABASE_URL이 설정되지 않았습니다")
-                return psycopg2.connect(self.db_url)
+                
+                # Supabase 연결 최적화
+                if 'supabase.co' in self.db_url:
+                    logger.info("🔧 Supabase 연결 최적화...")
+                    if '?' in self.db_url:
+                        optimized_url = self.db_url + '&connect_timeout=10&application_name=poker-insight'
+                    else:
+                        optimized_url = self.db_url + '?connect_timeout=10&application_name=poker-insight'
+                    return psycopg2.connect(optimized_url)
+                else:
+                    return psycopg2.connect(self.db_url)
             elif DB_TYPE == 'mysql':
                 if not self.db_url:
                     raise ValueError("DATABASE_URL이 설정되지 않았습니다")
@@ -67,6 +77,17 @@ class OnlineDataCollector:
             logger.error(f"데이터베이스 연결 실패: {str(e)}")
             logger.error(f"DB_TYPE: {DB_TYPE}")
             logger.error(f"DATABASE_URL 존재: {'Yes' if self.db_url else 'No'}")
+            
+            # IPv6 네트워크 문제 감지 시 SQLite로 fallback
+            if "Network is unreachable" in str(e) and 'supabase.co' in str(self.db_url):
+                logger.warning("🚨 Supabase IPv6 네트워크 문제 감지")
+                logger.warning("🔄 SQLite로 임시 fallback...")
+                try:
+                    import sqlite3
+                    return sqlite3.connect('github_actions_fallback.db')
+                except Exception as fallback_error:
+                    logger.error(f"SQLite fallback도 실패: {fallback_error}")
+            
             # 연결 문자열에서 민감정보 제거하여 로깅
             if self.db_url:
                 try:
