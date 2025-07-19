@@ -11,7 +11,7 @@ import sys
 import json
 import logging
 from datetime import datetime, timedelta
-from online_data_collector import OnlineDataCollector
+from online_data_collector import OnlineDataCollector, DB_TYPE
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,8 +28,8 @@ class DashboardUpdater:
             conn = self.collector.get_db_connection()
             cursor = conn.cursor()
             
-            # 최근 30일 데이터
-            if self.collector.DB_TYPE in ['postgresql', 'mysql']:
+            # 최근 30일 데이터  
+            if not self.collector.use_sqlite_fallback and DB_TYPE in ['postgresql', 'mysql']:
                 sql = """
                 SELECT 
                     collection_date,
@@ -78,10 +78,8 @@ class DashboardUpdater:
             latest_date_data = {}
             
             for row in results:
-                if self.collector.DB_TYPE in ['postgresql', 'mysql']:
-                    date, site, players, cash, peak, avg = row
-                else:
-                    date, site, players, cash, peak, avg = row
+                # PostgreSQL과 SQLite 모두 동일한 순서로 데이터 반환
+                date, site, players, cash, peak, avg = row
                 
                 dates_set.add(date)
                 
