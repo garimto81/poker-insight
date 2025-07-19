@@ -239,40 +239,58 @@ class OnlineDataCollector:
             
             for i, row in enumerate(rows):
                 try:
-                    # 새로운 HTML 구조에서 데이터 추출
-                    all_texts = []
-                    for element in row.find_all(['span', 'div', 'td']):
-                        text = element.get_text(strip=True)
-                        if text and len(text) > 0:
-                            all_texts.append(text)
-                    
-                    if len(all_texts) < 5:
+                    # CoinPoker 광고 행은 건너뛰기
+                    if 'cus_top_traffic_coin' in row.get('class', []):
                         continue
                     
-                    # 사이트명 추출 - "1GGNetwork"에서 "GGNetwork" 추출
-                    site_name_raw = all_texts[0] if all_texts else ""
+                    # 사이트명 추출
+                    brand_title = row.find('span', {'class': 'brand-title'})
+                    if not brand_title:
+                        continue
                     
-                    # 숫자로 시작하는 경우 숫자 제거
-                    site_name = re.sub(r'^\d+', '', site_name_raw).strip()
-                    
+                    site_name = brand_title.get_text(strip=True)
                     if not site_name or len(site_name) < 2:
                         continue
                     
-                    # 숫자 데이터 추출 (콤마 제거)
-                    numbers = []
-                    for text in all_texts:
-                        clean_text = text.replace(',', '')
-                        if clean_text.isdigit() and int(clean_text) >= 0:
-                            numbers.append(int(clean_text))
+                    # 각 데이터 필드를 ID로 직접 찾기
+                    players_online = 0
+                    cash_players = 0
+                    peak_24h = 0
+                    seven_day_avg = 0
                     
-                    # 최소 4개의 숫자가 필요 (players_online, cash_players, peak_24h, seven_day_avg)
-                    if len(numbers) < 4:
-                        continue
+                    # Players Online
+                    online_td = row.find('td', {'id': 'online'})
+                    if online_td:
+                        online_span = online_td.find('span')
+                        if online_span:
+                            online_text = online_span.get_text(strip=True).replace(',', '')
+                            if online_text.isdigit():
+                                players_online = int(online_text)
                     
-                    players_online = numbers[0] if len(numbers) > 0 else 0
-                    cash_players = numbers[1] if len(numbers) > 1 else 0
-                    peak_24h = numbers[2] if len(numbers) > 2 else 0
-                    seven_day_avg = numbers[3] if len(numbers) > 3 else 0
+                    # Cash Players
+                    cash_td = row.find('td', {'id': 'cash'})
+                    if cash_td:
+                        cash_text = cash_td.get_text(strip=True).replace(',', '')
+                        if cash_text.isdigit():
+                            cash_players = int(cash_text)
+                    
+                    # 24H Peak
+                    peak_td = row.find('td', {'id': 'peak'})
+                    if peak_td:
+                        peak_span = peak_td.find('span')
+                        if peak_span:
+                            peak_text = peak_span.get_text(strip=True).replace(',', '')
+                            if peak_text.isdigit():
+                                peak_24h = int(peak_text)
+                    
+                    # 7 Day Average
+                    avg_td = row.find('td', {'id': 'avg'})
+                    if avg_td:
+                        avg_span = avg_td.find('span')
+                        if avg_span:
+                            avg_text = avg_span.get_text(strip=True).replace(',', '')
+                            if avg_text.isdigit():
+                                seven_day_avg = int(avg_text)
                     
                     # 데이터 검증 - 모든 값이 0인 경우 제외
                     if players_online == 0 and cash_players == 0 and peak_24h == 0:
