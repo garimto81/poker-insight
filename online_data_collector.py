@@ -18,8 +18,8 @@ from bs4 import BeautifulSoup
 import re
 
 # 환경변수에 따른 데이터베이스 설정
-DB_TYPE = os.getenv('DB_TYPE', 'sqlite')  # postgresql, mysql, sqlite  
-DATABASE_URL = os.getenv('DATABASE_URL', 'online_poker_data.db')
+DB_TYPE = os.getenv('DB_TYPE', 'postgresql')  # postgresql, mysql, sqlite  
+DATABASE_URL = os.getenv('DATABASE_URL', '')
 
 if DB_TYPE == 'postgresql':
     import psycopg2
@@ -54,13 +54,19 @@ class OnlineDataCollector:
         """데이터베이스 연결"""
         try:
             if DB_TYPE == 'postgresql':
+                if not self.db_url:
+                    raise ValueError("DATABASE_URL이 설정되지 않았습니다")
                 return psycopg2.connect(self.db_url)
             elif DB_TYPE == 'mysql':
+                if not self.db_url:
+                    raise ValueError("DATABASE_URL이 설정되지 않았습니다")
                 return pymysql.connect(self.db_url)
             else:
                 return sqlite3.connect('online_poker_data.db')
         except Exception as e:
-            logger.error(f"❌ 데이터베이스 연결 실패: {str(e)}")
+            logger.error(f"데이터베이스 연결 실패: {str(e)}")
+            logger.error(f"DB_TYPE: {DB_TYPE}")
+            logger.error(f"DATABASE_URL 존재: {'Yes' if self.db_url else 'No'}")
             raise
     
     def setup_database(self):
