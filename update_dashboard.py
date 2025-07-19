@@ -392,17 +392,17 @@ class DashboardUpdater:
 
 def main():
     """메인 실행"""
-    print("🌐 온라인 대시보드 업데이트")
+    print("온라인 대시보드 업데이트")
     print("=" * 40)
     
     updater = DashboardUpdater()
     success = updater.update_dashboard()
     
     if success:
-        print("✅ 대시보드 업데이트 성공")
+        print("[SUCCESS] 대시보드 업데이트 성공")
         sys.exit(0)
     else:
-        print("❌ 대시보드 업데이트 실패")
+        print("[FAILED] 대시보드 업데이트 실패")
         sys.exit(1)
 
 if __name__ == "__main__":
