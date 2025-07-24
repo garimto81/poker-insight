@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-07-20T01:10:35.905485",
+  "last_updated": "2025-07-24T18:58:45.269473",
   "data_period_days": 30,
   "sites": {
     "888poker": {
@@ -7,18 +7,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
-          218
+          218,
+          163
         ],
         "peak_24h": [
-          865
+          865,
+          832
         ],
         "seven_day_avg": [
+          400,
           400
         ]
       }
@@ -28,18 +33,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          5,
           5
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          0,
           0
         ],
         "seven_day_avg": [
+          0,
           0
         ]
       }
@@ -49,18 +59,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          250,
           250
         ],
         "seven_day_avg": [
+          120,
           120
         ]
       }
@@ -70,18 +85,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          2,
           2
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          0,
           0
         ],
         "seven_day_avg": [
+          0,
           0
         ]
       }
@@ -91,19 +111,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          20
+          20,
+          18
         ],
         "cash_players": [
-          9
+          9,
+          6
         ],
         "peak_24h": [
-          41
+          41,
+          46
         ],
         "seven_day_avg": [
-          16
+          16,
+          14
         ]
       }
     },
@@ -133,18 +158,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          25,
           25
         ],
         "seven_day_avg": [
+          10,
           10
         ]
       }
@@ -175,19 +205,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
-          22
+          22,
+          0
         ],
         "peak_24h": [
-          26
+          26,
+          23
         ],
         "seven_day_avg": [
-          9
+          9,
+          8
         ]
       }
     },
@@ -196,18 +231,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          66,
           66
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          0,
           0
         ],
         "seven_day_avg": [
+          0,
           0
         ]
       }
@@ -217,18 +257,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          110,
           110
         ],
         "seven_day_avg": [
+          45,
           45
         ]
       }
@@ -238,18 +283,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          2253
+          2253,
+          1000
         ],
         "cash_players": [
-          671
+          671,
+          205
         ],
         "peak_24h": [
-          671
+          671,
+          733
         ],
         "seven_day_avg": [
+          375,
           375
         ]
       }
@@ -259,18 +309,23 @@
       "category": "GG_POKER",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          134304
+          134304,
+          198387
         ],
         "cash_players": [
-          5242
+          5242,
+          9658
         ],
         "peak_24h": [
-          5242
+          5242,
+          13931
         ],
         "seven_day_avg": [
+          10500,
           10500
         ]
       }
@@ -280,18 +335,23 @@
       "category": "GG_POKER",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          4693
+          4693,
+          516
         ],
         "cash_players": [
-          563
+          563,
+          86
         ],
         "peak_24h": [
-          625
+          625,
+          702
         ],
         "seven_day_avg": [
+          350,
           350
         ]
       }
@@ -301,18 +361,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          325,
           325
         ],
         "seven_day_avg": [
+          160,
           160
         ]
       }
@@ -322,19 +387,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          15
+          15,
+          47
         ],
         "cash_players": [
-          0
+          0,
+          14
         ],
         "peak_24h": [
-          28
+          28,
+          35
         ],
         "seven_day_avg": [
-          7
+          7,
+          9
         ]
       }
     },
@@ -343,18 +413,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          900,
           900
         ],
         "seven_day_avg": [
+          525,
           525
         ]
       }
@@ -364,18 +439,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          20,
           20
         ],
         "seven_day_avg": [
+          10,
           10
         ]
       }
@@ -385,18 +465,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          55,
           55
         ],
         "seven_day_avg": [
+          20,
           20
         ]
       }
@@ -406,19 +491,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
-          8
+          8,
+          40
         ],
         "peak_24h": [
-          8
+          8,
+          253
         ],
         "seven_day_avg": [
-          120
+          120,
+          110
         ]
       }
     },
@@ -427,18 +517,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          1500,
           1500
         ],
         "seven_day_avg": [
+          800,
           800
         ]
       }
@@ -448,18 +543,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          18,
           18
         ],
         "peak_24h": [
+          18,
           18
         ],
         "seven_day_avg": [
+          18,
           18
         ]
       }
@@ -469,18 +569,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          201
+          201,
+          314
         ],
         "cash_players": [
-          21
+          21,
+          45
         ],
         "peak_24h": [
-          134
+          134,
+          45
         ],
         "seven_day_avg": [
+          55,
           55
         ]
       }
@@ -490,18 +595,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          300,
           300
         ],
         "seven_day_avg": [
+          150,
           150
         ]
       }
@@ -511,18 +621,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          40,
           40
         ],
         "seven_day_avg": [
+          14,
           14
         ]
       }
@@ -532,18 +647,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          515,
           515
         ],
         "seven_day_avg": [
+          280,
           280
         ]
       }
@@ -553,19 +673,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          73
+          73,
+          221
         ],
         "cash_players": [
-          25
+          25,
+          52
         ],
         "peak_24h": [
-          137
+          137,
+          140
         ],
         "seven_day_avg": [
-          75
+          75,
+          60
         ]
       }
     },
@@ -574,18 +699,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          20,
           20
         ],
         "seven_day_avg": [
+          5,
           5
         ]
       }
@@ -616,19 +746,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          55540,
           55540
         ],
         "cash_players": [
-          0
+          0,
+          21
         ],
         "peak_24h": [
-          0
+          0,
+          263
         ],
         "seven_day_avg": [
-          0
+          0,
+          6
         ]
       }
     },
@@ -637,19 +772,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
-          220
+          220,
+          19
         ],
         "peak_24h": [
-          220
+          220,
+          284
         ],
         "seven_day_avg": [
-          85
+          85,
+          80
         ]
       }
     },
@@ -679,18 +819,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          694
+          694,
+          2096
         ],
         "cash_players": [
-          176
+          176,
+          547
         ],
         "peak_24h": [
-          843
+          843,
+          875
         ],
         "seven_day_avg": [
+          500,
           500
         ]
       }
@@ -700,18 +845,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          3039,
           3039
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          0,
           0
         ],
         "seven_day_avg": [
+          0,
           0
         ]
       }
@@ -721,19 +871,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          543
+          543,
+          245
         ],
         "cash_players": [
-          256
+          256,
+          159
         ],
         "peak_24h": [
-          476
+          476,
+          531
         ],
         "seven_day_avg": [
-          0
+          0,
+          240
         ]
       }
     },
@@ -742,18 +897,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          20,
           20
         ],
         "seven_day_avg": [
+          5,
           5
         ]
       }
@@ -763,18 +923,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          220,
           220
         ],
         "seven_day_avg": [
+          100,
           100
         ]
       }
@@ -784,19 +949,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          332
+          332,
+          518
         ],
         "cash_players": [
-          22
+          22,
+          95
         ],
         "peak_24h": [
-          210
+          210,
+          250
         ],
         "seven_day_avg": [
-          100
+          100,
+          110
         ]
       }
     },
@@ -805,19 +975,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          134
+          134,
+          123
         ],
         "cash_players": [
-          13
+          13,
+          18
         ],
         "peak_24h": [
-          13
+          13,
+          42
         ],
         "seven_day_avg": [
-          16
+          16,
+          20
         ]
       }
     },
@@ -826,18 +1001,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          0,
           0
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          750,
           750
         ],
         "seven_day_avg": [
+          400,
           400
         ]
       }
@@ -847,18 +1027,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          2989
+          2989,
+          4214
         ],
         "cash_players": [
-          1596
+          1596,
+          2760
         ],
         "peak_24h": [
-          3478
+          3478,
+          3500
         ],
         "seven_day_avg": [
+          2400,
           2400
         ]
       }
@@ -868,18 +1053,23 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
+          1605,
           1605
         ],
         "cash_players": [
+          0,
           0
         ],
         "peak_24h": [
+          0,
           0
         ],
         "seven_day_avg": [
+          0,
           0
         ]
       }
@@ -910,19 +1100,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          2036
+          2036,
+          650
         ],
         "cash_players": [
-          398
+          398,
+          122
         ],
         "peak_24h": [
-          482
+          482,
+          573
         ],
         "seven_day_avg": [
-          0
+          0,
+          325
         ]
       }
     },
@@ -931,19 +1126,24 @@
       "category": "COMPETITOR",
       "data": {
         "dates": [
-          "2025-07-20"
+          "2025-07-20",
+          "2025-07-24"
         ],
         "players_online": [
-          1612
+          1612,
+          357
         ],
         "cash_players": [
-          596
+          596,
+          155
         ],
         "peak_24h": [
-          809
+          809,
+          935
         ],
         "seven_day_avg": [
-          0
+          0,
+          425
         ]
       }
     },
@@ -967,15 +1167,63 @@
           0
         ]
       }
+    },
+    "PokerStars Europe": {
+      "name": "PokerStars Europe",
+      "category": "COMPETITOR",
+      "data": {
+        "dates": [
+          "2025-07-20",
+          "2025-07-24"
+        ],
+        "players_online": [
+          0,
+          0
+        ],
+        "cash_players": [
+          1139,
+          1333
+        ],
+        "peak_24h": [
+          1200,
+          1448
+        ],
+        "seven_day_avg": [
+          0,
+          0
+        ]
+      }
+    },
+    "PartyPoker Europe": {
+      "name": "PartyPoker Europe",
+      "category": "COMPETITOR",
+      "data": {
+        "dates": [
+          "2025-07-24"
+        ],
+        "players_online": [
+          0
+        ],
+        "cash_players": [
+          24
+        ],
+        "peak_24h": [
+          24
+        ],
+        "seven_day_avg": [
+          18
+        ]
+      }
     }
   },
   "dates": [
-    "2025-07-20"
+    "2025-07-20",
+    "2025-07-24"
   ],
   "summary": {
-    "total_sites": 46,
+    "total_sites": 48,
     "gg_poker_sites": 2,
-    "latest_total_players": 281028,
-    "data_points": 46
+    "latest_total_players": 268963,
+    "data_points": 135
   }
 }
