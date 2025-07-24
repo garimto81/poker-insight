@@ -217,7 +217,7 @@
         let dashboardData;
         let chartInstances = {};
         
-        // 개선된 데이터 로딩 함수
+        // 개선된 데이터 로딩 함수 (CORS 이슈 해결)
         async function loadDashboardData() {
             const loadingEl = document.getElementById('loading-indicator');
             const errorContainer = document.getElementById('error-container');
@@ -226,38 +226,74 @@
                 loadingEl.style.display = 'block';
                 errorContainer.innerHTML = '';
                 
-                const response = await fetch('./api_data.json');
+                // CORS 이슈 감지를 위한 timeout 설정
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5초 timeout
+                
+                const response = await fetch('./api_data.json', {
+                    signal: controller.signal,
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
                 const data = await response.json();
                 loadingEl.style.display = 'none';
+                console.log('✅ Data loaded successfully');
                 return data;
                 
             } catch (error) {
                 console.error('Failed to load dashboard data:', error);
                 loadingEl.style.display = 'none';
                 
-                // 에러 메시지 표시
-                errorContainer.innerHTML = `
-                    <div class="error-message">
-                        <strong>데이터 로딩 실패:</strong> ${error.message}<br>
-                        <small>잠시 후 다시 시도해주세요. 문제가 지속되면 관리자에게 문의하세요.</small>
-                    </div>
-                `;
+                // CORS 특별 처리
+                if (error.name === 'TypeError' || error.message.includes('fetch')) {
+                    errorContainer.innerHTML = `
+                        <div class="error-message">
+                            <strong>🚫 CORS 접근 제한:</strong> 브라우저 보안정책으로 인해 로컬 파일 접근이 차단되었습니다.<br>
+                            <small><strong>해결방법:</strong> HTTP 서버로 실행하세요</small><br>
+                            <code>python -m http.server 8000</code> 실행 후 <code>http://localhost:8000</code> 접속
+                        </div>
+                    `;
+                } else {
+                    errorContainer.innerHTML = `
+                        <div class="error-message">
+                            <strong>데이터 로딩 실패:</strong> ${error.message}<br>
+                            <small>HTTP 서버에서 실행해보세요: <code>python -m http.server 8000</code></small>
+                        </div>
+                    `;
+                }
                 
-                // fallback data
+                // 더 자세한 fallback 데이터 (데모용)
                 return {
                     "last_updated": new Date().toISOString(),
                     "data_period_days": 30,
-                    "sites": {},
-                    "dates": [],
+                    "sites": {
+                        "Demo Mode": {
+                            "name": "Demo Mode",
+                            "category": "DEMO",
+                            "data": {
+                                "dates": [new Date().toISOString().split('T')[0]],
+                                "players_online": [0],
+                                "cash_players": [0],
+                                "peak_24h": [0],
+                                "seven_day_avg": [0]
+                            }
+                        }
+                    },
+                    "dates": [new Date().toISOString().split('T')[0]],
                     "summary": {
-                        "total_sites": 0,
+                        "total_sites": 1,
                         "gg_poker_sites": 0,
                         "latest_total_players": 0,
-                        "data_points": 0
+                        "data_points": 1
                     }
                 };
             }
