@@ -88,6 +88,34 @@
             text-align: center; color: #7f8c8d; 
             font-size: 0.9em; margin-top: 20px; 
         }
+        
+        /* 로딩 인디케이터 */
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            margin-right: 10px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -97,13 +125,20 @@
             <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트 • 글로벌 포커 네트워크 모니터링</p>
         </div>
         
+        <div id="loading-indicator" class="loading-indicator">
+            <div class="loading-spinner">⟳</div>
+            대시보드 데이터 로딩 중...
+        </div>
+        
+        <div id="error-container"></div>
+        
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-number">57</div>
+                <div class="stat-number" id="total-sites">로딩 중...</div>
                 <div class="stat-label">분석 대상 사이트</div>
             </div>
             <div class="stat-card gg-highlight">
-                <div class="stat-number">1,653</div>
+                <div class="stat-number" id="total-players">로딩 중...</div>
                 <div class="stat-label">전체 접속자 수</div>
             </div>
         </div>
@@ -172,30 +207,127 @@
             </div>
         </div>
         
-        <div class="last-updated">
-            마지막 업데이트: 2025-07-20 01:10:36 UTC
+        <div class="last-updated" id="last-updated">
+            데이터 로딩 중...
         </div>
     </div>
 
     <script>
-        // 실제 서버 데이터를 동적으로 로드
+        // 전역 변수
+        let dashboardData;
+        let chartInstances = {};
+        
+        // 개선된 데이터 로딩 함수
         async function loadDashboardData() {
+            const loadingEl = document.getElementById('loading-indicator');
+            const errorContainer = document.getElementById('error-container');
+            
             try {
+                loadingEl.style.display = 'block';
+                errorContainer.innerHTML = '';
+                
                 const response = await fetch('./api_data.json');
-                return await response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                loadingEl.style.display = 'none';
+                return data;
+                
             } catch (error) {
                 console.error('Failed to load dashboard data:', error);
+                loadingEl.style.display = 'none';
+                
+                // 에러 메시지 표시
+                errorContainer.innerHTML = `
+                    <div class="error-message">
+                        <strong>데이터 로딩 실패:</strong> ${error.message}<br>
+                        <small>잠시 후 다시 시도해주세요. 문제가 지속되면 관리자에게 문의하세요.</small>
+                    </div>
+                `;
+                
                 // fallback data
-                return {"last_updated": "2025-07-20T00:03:03.309875", "data_period_days": 30, "sites": {}, "dates": ["2025-07-20"], "summary": {"total_sites": 0, "gg_poker_sites": 0, "latest_total_players": 0, "data_points": 0}};
+                return {
+                    "last_updated": new Date().toISOString(),
+                    "data_period_days": 30,
+                    "sites": {},
+                    "dates": [],
+                    "summary": {
+                        "total_sites": 0,
+                        "gg_poker_sites": 0,
+                        "latest_total_players": 0,
+                        "data_points": 0
+                    }
+                };
             }
         }
         
-        // 전역 변수로 dashboardData 선언
-        let dashboardData;
+        // 통계 카드 업데이트 함수
+        function updateStatistics(data) {
+            try {
+                const totalSitesEl = document.getElementById('total-sites');
+                const totalPlayersEl = document.getElementById('total-players');
+                
+                if (totalSitesEl) {
+                    totalSitesEl.textContent = data.summary.total_sites || 0;
+                }
+                
+                if (totalPlayersEl) {
+                    const players = data.summary.latest_total_players || 0;
+                    totalPlayersEl.textContent = players.toLocaleString('ko-KR');
+                }
+            } catch (error) {
+                console.error('Error updating statistics:', error);
+            }
+        }
+        
+        // 타임스탬프 업데이트 함수
+        function updateTimestamp(data) {
+            try {
+                const lastUpdatedEl = document.getElementById('last-updated');
+                if (lastUpdatedEl && data.last_updated) {
+                    const lastUpdated = new Date(data.last_updated);
+                    lastUpdatedEl.textContent = `마지막 업데이트: ${lastUpdated.toLocaleString('ko-KR')}`;
+                }
+            } catch (error) {
+                console.error('Error updating timestamp:', error);
+                const lastUpdatedEl = document.getElementById('last-updated');
+                if (lastUpdatedEl) {
+                    lastUpdatedEl.textContent = '업데이트 시간 확인 불가';
+                }
+            }
+        }
         
         // 메인 초기화 함수
         async function initializeDashboard() {
-            dashboardData = await loadDashboardData();
+            try {
+                // 1. 데이터 로드
+                dashboardData = await loadDashboardData();
+                
+                // 2. 통계 업데이트
+                updateStatistics(dashboardData);
+                
+                // 3. 타임스탬프 업데이트
+                updateTimestamp(dashboardData);
+                
+                // 4. 차트 생성 (데이터가 있는 경우에만)
+                if (dashboardData.sites && Object.keys(dashboardData.sites).length > 0) {
+                    createAllCharts();
+                } else {
+                    console.warn('No site data available for charts');
+                }
+                
+            } catch (error) {
+                console.error('Dashboard initialization failed:', error);
+                const errorContainer = document.getElementById('error-container');
+                errorContainer.innerHTML = `
+                    <div class="error-message">
+                        <strong>대시보드 초기화 실패:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
         
         // 글로벌 변수
         let chartInstances = {};
@@ -321,21 +453,25 @@
             });
         }
         
-            // 통계 카드 업데이트
-            document.querySelector('.stat-card .stat-number').textContent = dashboardData.summary.total_sites;
-            document.querySelectorAll('.stat-card .stat-number')[1].textContent = dashboardData.summary.latest_total_players.toLocaleString();
-            
-            // 마지막 업데이트 시간 업데이트
-            const lastUpdated = new Date(dashboardData.last_updated).toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
-            document.querySelector('.last-updated').textContent = `마지막 업데이트: ${lastUpdated}`;
-            
-            // 4개 차트 생성 (기본 7일)
-            createBarChart('onlinePlayersChart', 'Online Players', 'players_online', '7d');
-            createBarChart('cashPlayersChart', 'Cash Players', 'cash_players', '7d');
-            createBarChart('peak24hChart', '24H Peak', 'peak_24h', '7d');
-            createBarChart('sevenDayAvgChart', '7-Day Average', 'seven_day_avg', '7d');
-            
-            // 기간 선택 버튼 이벤트 리스너 추가
+        // 모든 차트를 생성하는 함수
+        function createAllCharts() {
+            try {
+                // 4개 차트 생성 (기본 7일)
+                createBarChart('onlinePlayersChart', 'Online Players', 'players_online', '7d');
+                createBarChart('cashPlayersChart', 'Cash Players', 'cash_players', '7d');
+                createBarChart('peak24hChart', '24H Peak', 'peak_24h', '7d');
+                createBarChart('sevenDayAvgChart', '7-Day Average', 'seven_day_avg', '7d');
+                
+                // 기간 선택 버튼 이벤트 리스너 추가
+                setupPeriodButtons();
+                
+            } catch (error) {
+                console.error('Error creating charts:', error);
+            }
+        }
+        
+        // 기간 선택 버튼 설정 함수
+        function setupPeriodButtons() {
             document.querySelectorAll('.period-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const period = this.dataset.period;
@@ -343,13 +479,13 @@
                     
                     // 같은 차트의 다른 버튼들에서 active 클래스 제거
                     this.parentElement.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-                    // 현재 버튼에 active 클래스 추가
+                    // 현재 버튼에 active 클래스 추가  
                     this.classList.add('active');
                     
                     // 해당 차트 업데이트
                     const dataTypeMap = {
                         'onlinePlayersChart': 'players_online',
-                        'cashPlayersChart': 'cash_players',
+                        'cashPlayersChart': 'cash_players', 
                         'peak24hChart': 'peak_24h',
                         'sevenDayAvgChart': 'seven_day_avg'
                     };
@@ -357,7 +493,7 @@
                     const titleMap = {
                         'onlinePlayersChart': 'Online Players',
                         'cashPlayersChart': 'Cash Players',
-                        'peak24hChart': '24H Peak',
+                        'peak24hChart': '24H Peak', 
                         'sevenDayAvgChart': '7-Day Average'
                     };
                     
