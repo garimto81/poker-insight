@@ -22,7 +22,7 @@ class DashboardUpdater:
         self.output_dir = 'docs'  # GitHub Pages용
         os.makedirs(self.output_dir, exist_ok=True)
         
-    def get_dashboard_data(self, days_back=30):
+    def get_dashboard_data(self, days_back=365):
         """대시보드용 데이터 조회"""
         try:
             conn = self.collector.get_db_connection()
@@ -129,10 +129,48 @@ class DashboardUpdater:
             return None
     
     def generate_api_endpoints(self, dashboard_data):
-        """API 엔드포인트 JSON 파일 생성"""
+        """API 엔드포인트 JSON 파일 생성 - 기존 데이터와 병합"""
         try:
-            # 메인 대시보드 데이터
-            with open(f'{self.output_dir}/api_data.json', 'w', encoding='utf-8') as f:
+            # 기존 데이터 읽기
+            existing_data = None
+            api_data_path = f'{self.output_dir}/api_data.json'
+            
+            if os.path.exists(api_data_path):
+                try:
+                    with open(api_data_path, 'r', encoding='utf-8') as f:
+                        existing_data = json.load(f)
+                except Exception as e:
+                    logger.warning(f"기존 데이터 읽기 실패: {e}")
+            
+            # 데이터 병합
+            if existing_data and 'sites' in existing_data:
+                # 각 사이트별로 기존 데이터와 새 데이터 병합
+                for site_name, new_site_data in dashboard_data['sites'].items():
+                    if site_name in existing_data['sites']:
+                        # 기존 사이트 데이터가 있으면 병합
+                        existing_site = existing_data['sites'][site_name]
+                        
+                        # 새로운 날짜만 추가
+                        for idx, date in enumerate(new_site_data['data']['dates']):
+                            if date not in existing_site['data']['dates']:
+                                existing_site['data']['dates'].append(date)
+                                existing_site['data']['players_online'].append(new_site_data['data']['players_online'][idx])
+                                existing_site['data']['cash_players'].append(new_site_data['data']['cash_players'][idx])
+                                existing_site['data']['peak_24h'].append(new_site_data['data']['peak_24h'][idx])
+                                existing_site['data']['seven_day_avg'].append(new_site_data['data']['seven_day_avg'][idx])
+                    else:
+                        # 새로운 사이트면 그대로 추가
+                        existing_data['sites'][site_name] = new_site_data
+                
+                # 메타데이터 업데이트
+                existing_data['last_updated'] = dashboard_data['last_updated']
+                existing_data['dates'] = sorted(list(set(existing_data.get('dates', []) + dashboard_data['dates'])))
+                existing_data['summary'] = dashboard_data['summary']
+                
+                dashboard_data = existing_data
+            
+            # 메인 대시보드 데이터 저장
+            with open(api_data_path, 'w', encoding='utf-8') as f:
                 json.dump(dashboard_data, f, indent=2, ensure_ascii=False)
             
             # 요약 데이터만 (경량화)
@@ -372,8 +410,8 @@ class DashboardUpdater:
         logger.info("🔄 온라인 대시보드 업데이트 시작...")
         
         try:
-            # 대시보드 데이터 조회
-            dashboard_data = self.get_dashboard_data(30)
+            # 대시보드 데이터 조회 - 1년치 데이터
+            dashboard_data = self.get_dashboard_data(365)
             
             if not dashboard_data:
                 logger.error("❌ 대시보드 데이터 조회 실패")
