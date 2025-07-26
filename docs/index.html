@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GG POKER 모니터링 대시보드</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js는 동적으로 로드됩니다 -->
     <script src="./supabase-integration.js"></script>
     <style>
         body { 
@@ -122,7 +122,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>온라인 포커 사이트 분석 v1.3.1</h1>
+            <h1>온라인 포커 사이트 분석 v1.3.2</h1>
             <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트 • 글로벌 포커 네트워크 모니터링</p>
         </div>
         
@@ -260,7 +260,57 @@
         let dashboardData;
         let chartInstances = {};
         
-        console.log('🚀 스크립트 로딩 시작 - v1.3.1');
+        console.log('🚀 스크립트 로딩 시작 - v1.3.2');
+        
+        // Chart.js 동적 로딩 함수
+        async function ensureChartJSLoaded() {
+            return new Promise((resolve, reject) => {
+                // 이미 로드되어 있으면 바로 반환
+                if (typeof Chart !== 'undefined') {
+                    console.log('✅ Chart.js 이미 로드됨:', Chart.version);
+                    resolve(true);
+                    return;
+                }
+                
+                console.log('📦 Chart.js 동적 로딩 시작...');
+                
+                // 기존 스크립트 태그가 있는지 확인
+                const existingScript = document.querySelector('script[src*="chart.js"]');
+                if (existingScript) {
+                    console.log('🔄 기존 Chart.js 스크립트 태그 발견, 재시도...');
+                    existingScript.remove();
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
+                script.async = true;
+                
+                script.onload = () => {
+                    if (typeof Chart !== 'undefined') {
+                        console.log('✅ Chart.js 동적 로딩 성공:', Chart.version);
+                        resolve(true);
+                    } else {
+                        console.error('❌ Chart.js 로드되었지만 Chart 객체 없음');
+                        reject(new Error('Chart.js 로드되었지만 Chart 객체를 찾을 수 없습니다'));
+                    }
+                };
+                
+                script.onerror = (error) => {
+                    console.error('❌ Chart.js 동적 로딩 실패:', error);
+                    reject(new Error('Chart.js 라이브러리 로딩에 실패했습니다'));
+                };
+                
+                document.head.appendChild(script);
+                
+                // 타임아웃 설정 (10초)
+                setTimeout(() => {
+                    if (typeof Chart === 'undefined') {
+                        console.error('❌ Chart.js 로딩 타임아웃');
+                        reject(new Error('Chart.js 로딩 타임아웃 (10초)'));
+                    }
+                }, 10000);
+            });
+        }
         
         // 개선된 데이터 로딩 함수 (Supabase + CORS 이슈 해결)
         async function loadDashboardData() {
@@ -418,11 +468,26 @@
                 console.log('⏰ 3단계: 타임스탬프 업데이트');
                 updateTimestamp(dashboardData);
                 
-                // 4. 차트 생성 (데이터가 있는 경우에만)
-                console.log('📊 4단계: 차트 생성');
+                // 4. Chart.js 로딩 확인 및 차트 생성
+                console.log('📊 4단계: Chart.js 로딩 및 차트 생성');
                 if (dashboardData.sites && Object.keys(dashboardData.sites).length > 0) {
-                    createAllCharts();
-                    console.log('✅ 차트 생성 완료');
+                    try {
+                        await ensureChartJSLoaded();
+                        createAllCharts();
+                        console.log('✅ 차트 생성 완료');
+                    } catch (chartError) {
+                        console.error('❌ Chart.js 로딩 실패:', chartError);
+                        
+                        // Chart.js 로딩 실패 시 사용자에게 알림
+                        if (errorContainer) {
+                            errorContainer.innerHTML = `
+                                <div class="error-message">
+                                    <strong>⚠️ 차트 라이브러리 로딩 실패:</strong> ${chartError.message}<br>
+                                    <small>차트는 표시되지 않지만 데이터는 정상적으로 로드되었습니다</small>
+                                </div>
+                            `;
+                        }
+                    }
                 } else {
                     console.warn('⚠️ 차트용 사이트 데이터 없음');
                 }
@@ -613,15 +678,46 @@
             }
         }
         
+        // 차트 영역에 대체 메시지 표시
+        function showChartFallback(message = 'Chart.js 라이브러리 로딩 실패') {
+            const chartIds = ['onlinePlayersChart', 'cashPlayersChart', 'peak24hChart', 'sevenDayAvgChart'];
+            
+            chartIds.forEach(chartId => {
+                const canvas = document.getElementById(chartId);
+                if (canvas && canvas.parentElement) {
+                    const fallbackDiv = document.createElement('div');
+                    fallbackDiv.style.cssText = `
+                        text-align: center; 
+                        padding: 60px 20px; 
+                        color: #666; 
+                        font-size: 16px;
+                        background: #f9f9f9;
+                        border-radius: 10px;
+                        border: 2px dashed #ddd;
+                    `;
+                    fallbackDiv.innerHTML = `
+                        📊 차트 영역<br>
+                        <small style="color: #999;">${message}</small><br>
+                        <small style="color: #999;">데이터는 위의 통계 카드에서 확인하세요</small>
+                    `;
+                    
+                    canvas.style.display = 'none';
+                    canvas.parentElement.appendChild(fallbackDiv);
+                }
+            });
+        }
+        
         // 모든 차트를 생성하는 함수
         function createAllCharts() {
             try {
                 // Chart.js 라이브러리 로딩 확인
                 if (typeof Chart === 'undefined') {
-                    throw new Error('Chart.js 라이브러리가 로드되지 않았습니다');
+                    console.error('❌ Chart.js 라이브러리가 로드되지 않음');
+                    showChartFallback('Chart.js 라이브러리가 로드되지 않았습니다');
+                    return;
                 }
                 
-                console.log('📊 Starting chart creation...');
+                console.log('📊 차트 생성 시작...');
                 
                 // 4개 차트 생성 (기본 7일)
                 createBarChart('onlinePlayersChart', 'Online Players', 'players_online', '7d');
@@ -632,18 +728,19 @@
                 // 기간 선택 버튼 이벤트 리스너 추가
                 setupPeriodButtons();
                 
-                console.log('✅ All charts created successfully');
+                console.log('✅ 모든 차트 생성 완료');
                 
             } catch (error) {
-                console.error('❌ Error creating charts:', error);
+                console.error('❌ 차트 생성 중 오류:', error);
+                showChartFallback(`차트 생성 오류: ${error.message}`);
                 
                 // 차트 생성 실패 시 에러 메시지 표시
                 const errorContainer = document.getElementById('error-container');
                 if (errorContainer) {
                     errorContainer.innerHTML += `
                         <div class="error-message">
-                            <strong>차트 생성 실패:</strong> ${error.message}<br>
-                            <small>Chart.js 라이브러리 로딩을 확인하세요</small>
+                            <strong>⚠️ 차트 생성 실패:</strong> ${error.message}<br>
+                            <small>통계 데이터는 위의 카드에서 확인할 수 있습니다</small>
                         </div>
                     `;
                 }
