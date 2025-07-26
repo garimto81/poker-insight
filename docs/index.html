@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GG POKER 모니터링 대시보드</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./supabase-integration.js"></script>
     <style>
         body { 
             font-family: 'Segoe UI', Arial, sans-serif; 
@@ -213,12 +214,23 @@
     </div>
 
     <script>
+        // Supabase 설정 (환경변수 또는 설정)
+        // 실제 사용 시 이 값들을 실제 Supabase 프로젝트 정보로 교체하세요
+        window.SUPABASE_URL = ''; // 'https://your-project.supabase.co'
+        window.SUPABASE_ANON_KEY = ''; // 'your-anon-key'
+        
         // 전역 변수
         let dashboardData;
         let chartInstances = {};
         
-        // 개선된 데이터 로딩 함수 (CORS 이슈 해결)
+        // 개선된 데이터 로딩 함수 (Supabase + CORS 이슈 해결)
         async function loadDashboardData() {
+            // Supabase 연동 함수가 있으면 사용, 없으면 기존 방식
+            if (typeof loadDashboardDataEnhanced !== 'undefined') {
+                return await loadDashboardDataEnhanced();
+            }
+            
+            // 기존 JSON 파일 방식 (fallback)
             const loadingEl = document.getElementById('loading-indicator');
             const errorContainer = document.getElementById('error-container');
             
@@ -246,7 +258,7 @@
                 
                 const data = await response.json();
                 loadingEl.style.display = 'none';
-                console.log('✅ Data loaded successfully');
+                console.log('✅ Data loaded successfully from JSON');
                 return data;
                 
             } catch (error) {
@@ -258,7 +270,7 @@
                     errorContainer.innerHTML = `
                         <div class="error-message">
                             <strong>🚫 CORS 접근 제한:</strong> 브라우저 보안정책으로 인해 로컬 파일 접근이 차단되었습니다.<br>
-                            <small><strong>해결방법:</strong> HTTP 서버로 실행하세요</small><br>
+                            <small><strong>해결방법:</strong> HTTP 서버로 실행하거나 Supabase 연동을 사용하세요</small><br>
                             <code>python -m http.server 8000</code> 실행 후 <code>http://localhost:8000</code> 접속
                         </div>
                     `;
@@ -266,7 +278,7 @@
                     errorContainer.innerHTML = `
                         <div class="error-message">
                             <strong>데이터 로딩 실패:</strong> ${error.message}<br>
-                            <small>HTTP 서버에서 실행해보세요: <code>python -m http.server 8000</code></small>
+                            <small>Supabase 설정을 확인하거나 HTTP 서버에서 실행해보세요</small>
                         </div>
                     `;
                 }
