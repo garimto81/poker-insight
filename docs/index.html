@@ -122,7 +122,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>온라인 포커 사이트 분석 v1.2.2</h1>
+            <h1>온라인 포커 사이트 분석 v1.3.0</h1>
             <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트 • 글로벌 포커 네트워크 모니터링</p>
         </div>
         
@@ -225,18 +225,22 @@
         
         // 개선된 데이터 로딩 함수 (Supabase + CORS 이슈 해결)
         async function loadDashboardData() {
+            console.log('🔄 데이터 로딩 시작...');
+            
             // Supabase 연동 함수가 있으면 사용, 없으면 기존 방식
             if (typeof loadDashboardDataEnhanced !== 'undefined') {
+                console.log('🔗 Supabase 모드로 데이터 로딩 시도...');
                 return await loadDashboardDataEnhanced();
             }
             
             // 기존 JSON 파일 방식 (fallback)
-            const loadingEl = document.getElementById('loading-indicator');
+            console.log('📄 JSON 파일 모드로 데이터 로딩...');
             const errorContainer = document.getElementById('error-container');
             
             try {
-                loadingEl.style.display = 'block';
-                errorContainer.innerHTML = '';
+                if (errorContainer) {
+                    errorContainer.innerHTML = '';
+                }
                 
                 // CORS 이슈 감지를 위한 timeout 설정
                 const controller = new AbortController();
@@ -257,33 +261,36 @@
                 }
                 
                 const data = await response.json();
-                loadingEl.style.display = 'none';
-                console.log('✅ Data loaded successfully from JSON');
+                console.log('✅ JSON 파일에서 데이터 로드 성공');
                 return data;
                 
             } catch (error) {
-                console.error('Failed to load dashboard data:', error);
-                loadingEl.style.display = 'none';
+                console.error('❌ 데이터 로딩 실패:', error);
                 
-                // CORS 특별 처리
-                if (error.name === 'TypeError' || error.message.includes('fetch')) {
-                    errorContainer.innerHTML = `
-                        <div class="error-message">
-                            <strong>🚫 CORS 접근 제한:</strong> 브라우저 보안정책으로 인해 로컬 파일 접근이 차단되었습니다.<br>
-                            <small><strong>해결방법:</strong> HTTP 서버로 실행하거나 Supabase 연동을 사용하세요</small><br>
-                            <code>python -m http.server 8000</code> 실행 후 <code>http://localhost:8000</code> 접속
-                        </div>
-                    `;
-                } else {
-                    errorContainer.innerHTML = `
-                        <div class="error-message">
-                            <strong>데이터 로딩 실패:</strong> ${error.message}<br>
-                            <small>Supabase 설정을 확인하거나 HTTP 서버에서 실행해보세요</small>
-                        </div>
-                    `;
+                // 에러 메시지 표시
+                if (errorContainer) {
+                    let errorMessage = '';
+                    if (error.name === 'TypeError' || error.message.includes('fetch')) {
+                        errorMessage = `
+                            <div class="error-message">
+                                <strong>🚫 CORS 접근 제한:</strong> 브라우저 보안정책으로 인해 로컬 파일 접근이 차단되었습니다.<br>
+                                <small><strong>해결방법:</strong> HTTP 서버로 실행하거나 Supabase 연동을 사용하세요</small><br>
+                                <code>python -m http.server 8000</code> 실행 후 <code>http://localhost:8000</code> 접속
+                            </div>
+                        `;
+                    } else {
+                        errorMessage = `
+                            <div class="error-message">
+                                <strong>❌ 데이터 로딩 실패:</strong> ${error.message}<br>
+                                <small>Supabase 설정을 확인하거나 HTTP 서버에서 실행해보세요</small>
+                            </div>
+                        `;
+                    }
+                    errorContainer.innerHTML = errorMessage;
                 }
                 
                 // 더 자세한 fallback 데이터 (데모용)
+                console.log('🔄 fallback 데이터 사용');
                 return {
                     "last_updated": new Date().toISOString(),
                     "data_period_days": 30,
@@ -350,44 +357,56 @@
         // 메인 초기화 함수
         async function initializeDashboard() {
             const loadingEl = document.getElementById('loading-indicator');
+            const errorContainer = document.getElementById('error-container');
+            
+            console.log('🚀 대시보드 초기화 시작...');
+            
+            // 로딩 인디케이터 표시
+            if (loadingEl) {
+                loadingEl.style.display = 'block';
+            }
             
             try {
                 // 1. 데이터 로드
+                console.log('📊 1단계: 데이터 로드');
                 dashboardData = await loadDashboardData();
                 
                 // 2. 통계 업데이트
+                console.log('📈 2단계: 통계 업데이트');
                 updateStatistics(dashboardData);
                 
                 // 3. 타임스탬프 업데이트
+                console.log('⏰ 3단계: 타임스탬프 업데이트');
                 updateTimestamp(dashboardData);
                 
                 // 4. 차트 생성 (데이터가 있는 경우에만)
+                console.log('📊 4단계: 차트 생성');
                 if (dashboardData.sites && Object.keys(dashboardData.sites).length > 0) {
                     createAllCharts();
-                    console.log('✅ Dashboard initialization completed successfully');
+                    console.log('✅ 차트 생성 완료');
                 } else {
-                    console.warn('No site data available for charts');
+                    console.warn('⚠️ 차트용 사이트 데이터 없음');
                 }
                 
-                // 5. 로딩 인디케이터 숨기기 (성공 시)
-                if (loadingEl) {
-                    loadingEl.style.display = 'none';
-                }
+                console.log('🎉 대시보드 초기화 완료!');
                 
             } catch (error) {
-                console.error('Dashboard initialization failed:', error);
+                console.error('❌ 대시보드 초기화 실패:', error);
                 
-                // 로딩 인디케이터 숨기기 (실패 시에도)
+                if (errorContainer) {
+                    errorContainer.innerHTML = `
+                        <div class="error-message">
+                            <strong>❌ 대시보드 초기화 실패:</strong> ${error.message}<br>
+                            <small>페이지를 새로고침하거나 브라우저 콘솔을 확인하세요</small>
+                        </div>
+                    `;
+                }
+            } finally {
+                // 항상 로딩 인디케이터 숨기기
+                console.log('🔄 로딩 인디케이터 숨김');
                 if (loadingEl) {
                     loadingEl.style.display = 'none';
                 }
-                
-                const errorContainer = document.getElementById('error-container');
-                errorContainer.innerHTML = `
-                    <div class="error-message">
-                        <strong>대시보드 초기화 실패:</strong> ${error.message}
-                    </div>
-                `;
             }
         }
         
