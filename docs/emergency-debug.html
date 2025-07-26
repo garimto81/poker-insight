@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>긴급 디버그 - 포커 인사이트</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            background: #000; 
+            color: #0f0; 
+            margin: 20px; 
+            line-height: 1.6; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: #111; 
+            padding: 20px; 
+            border: 1px solid #333; 
+        }
+        .error { color: #f44; }
+        .warning { color: #fa0; }
+        .success { color: #4f4; }
+        .info { color: #4af; }
+        pre { 
+            background: #222; 
+            padding: 15px; 
+            border-radius: 5px; 
+            overflow-x: auto; 
+            white-space: pre-wrap; 
+        }
+        .section { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border-left: 4px solid #4af; 
+            background: #0a0a0a; 
+        }
+        .critical { border-left-color: #f44; }
+        .test-btn {
+            background: #333;
+            color: #0f0;
+            border: 1px solid #666;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .test-btn:hover { background: #555; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 긴급 디버그 모드 - 포커 인사이트 v1.3.1</h1>
+        <p>무한 로딩 문제 진단 도구</p>
+        
+        <div class="section">
+            <h3>🔧 즉시 테스트</h3>
+            <button class="test-btn" onclick="testMainPageLoad()">메인 페이지 로드 테스트</button>
+            <button class="test-btn" onclick="testJavaScriptExecution()">JavaScript 실행 테스트</button>
+            <button class="test-btn" onclick="testAPIData()">API 데이터 테스트</button>
+            <button class="test-btn" onclick="testChartJS()">Chart.js 로드 테스트</button>
+            <button class="test-btn" onclick="simulateMainDashboard()">메인 대시보드 시뮬레이션</button>
+            <button class="test-btn" onclick="runFullDiagnosis()">전체 진단 실행</button>
+        </div>
+        
+        <div class="section" id="results">
+            <h3>📊 진단 결과</h3>
+            <div id="output">테스트를 선택하세요...</div>
+        </div>
+    </div>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : 
+                             type === 'warning' ? 'warning' : 
+                             type === 'success' ? 'success' : 'info';
+            
+            output.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function clear() {
+            output.innerHTML = '';
+        }
+        
+        // 메인 페이지 로드 테스트
+        async function testMainPageLoad() {
+            clear();
+            log('info', '=== 메인 페이지 로드 테스트 시작 ===');
+            
+            try {
+                const response = await fetch('./index.html');
+                const html = await response.text();
+                
+                log('success', `메인 페이지 로드 성공 (${html.length} bytes)`);
+                
+                // 중요 요소 확인
+                const checks = [
+                    ['Chart.js CDN', html.includes('cdn.jsdelivr.net/npm/chart.js')],
+                    ['Supabase 스크립트', html.includes('supabase-integration.js')],
+                    ['DOMContentLoaded', html.includes('DOMContentLoaded')],
+                    ['initializeDashboard', html.includes('initializeDashboard')],
+                    ['loadDashboardData', html.includes('loadDashboardData')],
+                    ['loading-indicator ID', html.includes('id="loading-indicator"')],
+                    ['total-sites ID', html.includes('id="total-sites"')],
+                    ['total-players ID', html.includes('id="total-players"')]
+                ];
+                
+                checks.forEach(([name, found]) => {
+                    log(found ? 'success' : 'error', `${name}: ${found ? '✓' : '✗'}`);
+                });
+                
+                // 버전 확인
+                const versionMatch = html.match(/v(\d+\.\d+\.\d+)/);
+                if (versionMatch) {
+                    log('info', `발견된 버전: ${versionMatch[1]}`);
+                } else {
+                    log('warning', '버전 정보를 찾을 수 없음');
+                }
+                
+            } catch (error) {
+                log('error', `메인 페이지 로드 실패: ${error.message}`);
+            }
+        }
+        
+        // JavaScript 실행 테스트
+        async function testJavaScriptExecution() {
+            clear();
+            log('info', '=== JavaScript 실행 테스트 시작 ===');
+            
+            try {
+                // 기본 JavaScript 기능 테스트
+                log('info', 'fetch API 지원: ' + (typeof fetch !== 'undefined' ? '✓' : '✗'));
+                log('info', 'async/await 지원: ' + (async function(){return true;} ? '✓' : '✗'));
+                log('info', 'AbortController 지원: ' + (typeof AbortController !== 'undefined' ? '✓' : '✗'));
+                log('info', 'Promise 지원: ' + (typeof Promise !== 'undefined' ? '✓' : '✗'));
+                
+                // DOM 조작 테스트
+                const testDiv = document.createElement('div');
+                testDiv.id = 'test-element';
+                testDiv.style.display = 'none';
+                document.body.appendChild(testDiv);
+                
+                const found = document.getElementById('test-element');
+                log(found ? 'success' : 'error', 'DOM 요소 생성/조회 테스트: ' + (found ? '✓' : '✗'));
+                
+                document.body.removeChild(testDiv);
+                
+                // 콘솔 기능 테스트
+                log('info', 'console.log 지원: ' + (typeof console !== 'undefined' && typeof console.log === 'function' ? '✓' : '✗'));
+                log('info', 'console.error 지원: ' + (typeof console !== 'undefined' && typeof console.error === 'function' ? '✓' : '✗'));
+                
+                log('success', 'JavaScript 기본 기능 테스트 완료');
+                
+            } catch (error) {
+                log('error', `JavaScript 실행 테스트 실패: ${error.message}`);
+            }
+        }
+        
+        // API 데이터 테스트
+        async function testAPIData() {
+            clear();
+            log('info', '=== API 데이터 테스트 시작 ===');
+            
+            try {
+                const response = await fetch('./api_data.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log('success', 'API 데이터 로드 성공');
+                
+                // 데이터 구조 검증
+                const requiredKeys = ['summary', 'sites', 'last_updated'];
+                requiredKeys.forEach(key => {
+                    const found = key in data;
+                    log(found ? 'success' : 'error', `필수 키 '${key}': ${found ? '✓' : '✗'}`);
+                });
+                
+                if (data.summary) {
+                    log('info', `사이트 수: ${data.summary.total_sites || 'N/A'}`);
+                    log('info', `총 플레이어: ${data.summary.latest_total_players || 'N/A'}`);
+                    log('info', `데이터 포인트: ${data.summary.data_points || 'N/A'}`);
+                }
+                
+                if (data.sites) {
+                    const siteCount = Object.keys(data.sites).length;
+                    log('info', `실제 사이트 데이터: ${siteCount}개`);
+                    
+                    if (siteCount > 0) {
+                        const firstSite = Object.values(data.sites)[0];
+                        const hasData = firstSite.data && Array.isArray(firstSite.data.players_online);
+                        log(hasData ? 'success' : 'error', `사이트 데이터 구조: ${hasData ? '✓' : '✗'}`);
+                    }
+                }
+                
+            } catch (error) {
+                log('error', `API 데이터 테스트 실패: ${error.message}`);
+            }
+        }
+        
+        // Chart.js 로드 테스트
+        async function testChartJS() {
+            clear();
+            log('info', '=== Chart.js 로드 테스트 시작 ===');
+            
+            try {
+                // Chart.js CDN 응답 확인
+                const response = await fetch('https://cdn.jsdelivr.net/npm/chart.js');
+                log('success', `Chart.js CDN 응답: HTTP ${response.status}`);
+                
+                // Chart 객체 확인
+                if (typeof Chart !== 'undefined') {
+                    log('success', 'Chart.js 라이브러리 로드됨');
+                    log('info', `Chart.js 버전: ${Chart.version || 'Unknown'}`);
+                } else {
+                    log('warning', 'Chart.js 라이브러리가 로드되지 않음');
+                    
+                    // 동적으로 Chart.js 로드 시도
+                    log('info', 'Chart.js 동적 로드 시도...');
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                    script.onload = () => {
+                        log('success', 'Chart.js 동적 로드 성공');
+                        log('info', `Chart.js 버전: ${Chart.version || 'Unknown'}`);
+                    };
+                    script.onerror = () => {
+                        log('error', 'Chart.js 동적 로드 실패');
+                    };
+                    document.head.appendChild(script);
+                }
+                
+            } catch (error) {
+                log('error', `Chart.js 테스트 실패: ${error.message}`);
+            }
+        }
+        
+        // 메인 대시보드 시뮬레이션
+        async function simulateMainDashboard() {
+            clear();
+            log('info', '=== 메인 대시보드 시뮬레이션 시작 ===');
+            
+            try {
+                // 메인 대시보드의 주요 함수들을 시뮬레이션
+                log('info', '1단계: 데이터 로딩 시뮬레이션');
+                
+                const apiData = await fetch('./api_data.json').then(r => r.json());
+                log('success', '데이터 로딩 성공');
+                
+                log('info', '2단계: DOM 요소 확인');
+                
+                // 가상의 DOM 요소 생성
+                const mockElements = {
+                    'loading-indicator': document.createElement('div'),
+                    'total-sites': document.createElement('div'),
+                    'total-players': document.createElement('div'),
+                    'error-container': document.createElement('div')
+                };
+                
+                Object.entries(mockElements).forEach(([id, element]) => {
+                    element.id = id;
+                    if (id === 'loading-indicator') {
+                        element.style.display = 'block'; // 초기에 표시
+                    }
+                    document.body.appendChild(element);
+                });
+                
+                log('success', 'DOM 요소 생성 완료');
+                
+                log('info', '3단계: 통계 업데이트 시뮬레이션');
+                
+                // 통계 업데이트
+                mockElements['total-sites'].textContent = apiData.summary.total_sites;
+                mockElements['total-players'].textContent = apiData.summary.latest_total_players.toLocaleString();
+                
+                log('success', `통계 업데이트 완료: ${apiData.summary.total_sites}개 사이트, ${apiData.summary.latest_total_players}명 플레이어`);
+                
+                log('info', '4단계: 로딩 인디케이터 숨김');
+                
+                // 로딩 인디케이터 숨김
+                mockElements['loading-indicator'].style.display = 'none';
+                
+                const isHidden = mockElements['loading-indicator'].style.display === 'none';
+                log(isHidden ? 'success' : 'error', `로딩 인디케이터 숨김: ${isHidden ? '✓' : '✗'}`);
+                
+                log('success', '메인 대시보드 시뮬레이션 완료');
+                
+                // 정리
+                setTimeout(() => {
+                    Object.values(mockElements).forEach(element => {
+                        if (element.parentNode) {
+                            element.parentNode.removeChild(element);
+                        }
+                    });
+                }, 5000);
+                
+            } catch (error) {
+                log('error', `메인 대시보드 시뮬레이션 실패: ${error.message}`);
+            }
+        }
+        
+        // 전체 진단
+        async function runFullDiagnosis() {
+            clear();
+            log('info', '🚨 전체 진단 시작 🚨');
+            
+            await testMainPageLoad();
+            log('info', '---');
+            await testJavaScriptExecution();
+            log('info', '---');
+            await testAPIData();
+            log('info', '---');
+            await testChartJS();
+            log('info', '---');
+            await simulateMainDashboard();
+            
+            log('success', '🏁 전체 진단 완료');
+            
+            // 권장사항
+            log('info', '💡 권장 해결 방법:');
+            log('info', '1. 브라우저에서 Ctrl+F5 (강제 새로고침)');
+            log('info', '2. 브라우저 캐시 완전 삭제');
+            log('info', '3. 시크릿/인코그니토 모드에서 접속');
+            log('info', '4. 다른 브라우저에서 테스트');
+            log('info', '5. 개발자 도구 Console 탭 확인');
+        }
+        
+        // 페이지 로드 시 기본 정보 표시
+        window.addEventListener('load', () => {
+            log('info', '긴급 디버그 모드 로드 완료');
+            log('info', `현재 시간: ${new Date().toLocaleString()}`);
+            log('info', `브라우저: ${navigator.userAgent}`);
+            log('info', '진단할 테스트를 선택하세요...');
+        });
+    </script>
+</body>
+</html>

@@ -122,7 +122,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>온라인 포커 사이트 분석 v1.3.0</h1>
+            <h1>온라인 포커 사이트 분석 v1.3.1</h1>
             <p>실시간 포커 사이트 트래픽 분석 • 자동 업데이트 • 글로벌 포커 네트워크 모니터링</p>
         </div>
         
@@ -214,6 +214,43 @@
     </div>
 
     <script>
+        // 전역 에러 핸들러
+        window.addEventListener('error', function(e) {
+            console.error('🚨 전역 JavaScript 오류:', e.error);
+            console.error('파일:', e.filename, '라인:', e.lineno, '컬럼:', e.colno);
+            
+            const loadingEl = document.getElementById('loading-indicator');
+            const errorContainer = document.getElementById('error-container');
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorContainer) {
+                errorContainer.innerHTML = `
+                    <div class="error-message">
+                        <strong>❌ JavaScript 오류 발생:</strong> ${e.error.message}<br>
+                        <small>파일: ${e.filename} (라인: ${e.lineno})</small><br>
+                        <small>페이지를 새로고침하거나 다른 브라우저를 시도해보세요</small>
+                    </div>
+                `;
+            }
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('🚨 처리되지 않은 Promise 거부:', e.reason);
+            
+            const loadingEl = document.getElementById('loading-indicator');
+            const errorContainer = document.getElementById('error-container');
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorContainer) {
+                errorContainer.innerHTML = `
+                    <div class="error-message">
+                        <strong>❌ 비동기 작업 실패:</strong> ${e.reason}<br>
+                        <small>페이지를 새로고침하거나 다른 브라우저를 시도해보세요</small>
+                    </div>
+                `;
+            }
+        });
+        
         // Supabase 설정 (환경변수 또는 설정)
         // 실제 사용 시 이 값들을 실제 Supabase 프로젝트 정보로 교체하세요
         window.SUPABASE_URL = ''; // 'https://your-project.supabase.co'
@@ -222,6 +259,8 @@
         // 전역 변수
         let dashboardData;
         let chartInstances = {};
+        
+        console.log('🚀 스크립트 로딩 시작 - v1.3.1');
         
         // 개선된 데이터 로딩 함수 (Supabase + CORS 이슈 해결)
         async function loadDashboardData() {
@@ -489,49 +528,89 @@
         
         // 공통 함수: 차트 생성
         function createBarChart(canvasId, title, dataType, period = '7d') {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            
-            // 기존 차트 인스턴스 제거
-            if (chartInstances[canvasId]) {
-                chartInstances[canvasId].destroy();
-            }
-            
-            const top5 = getTop5Sites(dataType, period);
-            
-            const labels = top5.map(site => site.isGG ? `${site.name} [GG]` : site.name);
-            const data = top5.map(site => site.value);
-            const colors = top5.map(site => site.isGG ? '#e74c3c' : '#3498db');
-            
-            chartInstances[canvasId] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: title,
-                        data: data,
-                        backgroundColor: colors,
-                        borderColor: colors,
-                        borderWidth: 2,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
+            try {
+                console.log(`📊 차트 생성 시작: ${canvasId} (${title})`);
+                
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) {
+                    throw new Error(`Canvas 요소를 찾을 수 없음: ${canvasId}`);
+                }
+                
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    throw new Error(`Canvas context 생성 실패: ${canvasId}`);
+                }
+                
+                // Chart.js 라이브러리 확인
+                if (typeof Chart === 'undefined') {
+                    throw new Error('Chart.js 라이브러리가 로드되지 않음');
+                }
+                
+                // 기존 차트 인스턴스 제거
+                if (chartInstances[canvasId]) {
+                    console.log(`🔄 기존 차트 제거: ${canvasId}`);
+                    chartInstances[canvasId].destroy();
+                }
+                
+                const top5 = getTop5Sites(dataType, period);
+                
+                if (!top5 || top5.length === 0) {
+                    console.warn(`⚠️ 차트 데이터 없음: ${canvasId}`);
+                    return;
+                }
+                
+                const labels = top5.map(site => site.isGG ? `${site.name} [GG]` : site.name);
+                const data = top5.map(site => site.value);
+                const colors = top5.map(site => site.isGG ? '#e74c3c' : '#3498db');
+                
+                console.log(`📈 차트 데이터 준비 완료: ${labels.length}개 항목`);
+                
+                chartInstances[canvasId] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: title,
+                            data: data,
+                            backgroundColor: colors,
+                            borderColor: colors,
+                            borderWidth: 2,
+                            borderSkipped: false
+                        }]
                     },
-                    scales: {
-                        y: { beginAtZero: true },
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
                             }
                         }
                     }
+                });
+                
+                console.log(`✅ 차트 생성 완료: ${canvasId}`);
+                
+            } catch (error) {
+                console.error(`❌ 차트 생성 실패 (${canvasId}):`, error);
+                
+                // 차트 컨테이너에 에러 메시지 표시
+                const canvas = document.getElementById(canvasId);
+                if (canvas && canvas.parentElement) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = 'text-align: center; padding: 20px; color: #666; font-size: 14px;';
+                    errorDiv.innerHTML = `❌ 차트 로딩 실패<br><small>${error.message}</small>`;
+                    canvas.parentElement.appendChild(errorDiv);
+                    canvas.style.display = 'none';
                 }
-            });
+            }
         }
         
         // 모든 차트를 생성하는 함수
