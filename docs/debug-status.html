@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포커 인사이트 디버그 상태</title>
+    <style>
+        body { 
+            font-family: 'Courier New', monospace; 
+            margin: 20px; 
+            background: #1a1a1a; 
+            color: #00ff00; 
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: #000; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 1px solid #333; 
+        }
+        .status-item { 
+            margin: 10px 0; 
+            padding: 10px; 
+            background: #111; 
+            border-left: 4px solid #00ff00; 
+        }
+        .error { border-left-color: #ff0000; color: #ff6666; }
+        .warning { border-left-color: #ffaa00; color: #ffcc66; }
+        .success { border-left-color: #00ff00; color: #66ff66; }
+        .info { border-left-color: #0088ff; color: #66ccff; }
+        
+        pre { 
+            background: #222; 
+            padding: 10px; 
+            border-radius: 5px; 
+            overflow-x: auto; 
+            white-space: pre-wrap; 
+        }
+        
+        .timestamp { 
+            color: #888; 
+            font-size: 0.9em; 
+        }
+        
+        #log-container {
+            height: 400px;
+            overflow-y: auto;
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        
+        .log-error { background: #330000; color: #ff6666; }
+        .log-warn { background: #332200; color: #ffcc66; }
+        .log-info { background: #003300; color: #66ff66; }
+        .log-debug { background: #001133; color: #66ccff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 포커 인사이트 디버그 상태 v1.3.0</h1>
+        <p class="timestamp">실시간 상태 모니터링 - <span id="current-time"></span></p>
+        
+        <div class="status-item success">
+            <h3>📊 시스템 상태</h3>
+            <div id="system-status">초기화 중...</div>
+        </div>
+        
+        <div class="status-item info">
+            <h3>🌐 리소스 상태</h3>
+            <div id="resource-status">확인 중...</div>
+        </div>
+        
+        <div class="status-item warning">
+            <h3>📋 실행 로그</h3>
+            <div id="log-container"></div>
+        </div>
+        
+        <div class="status-item info">
+            <h3>📈 데이터 미리보기</h3>
+            <pre id="data-preview">로딩 중...</pre>
+        </div>
+    </div>
+
+    <script>
+        // 로그 관리
+        const logContainer = document.getElementById('log-container');
+        const logs = [];
+        
+        function addLog(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = {
+                timestamp,
+                type,
+                message,
+                id: Date.now()
+            };
+            
+            logs.push(logEntry);
+            
+            const logEl = document.createElement('div');
+            logEl.className = `log-entry log-${type}`;
+            logEl.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+            
+            logContainer.appendChild(logEl);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // 로그 개수 제한
+            if (logs.length > 50) {
+                logs.shift();
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+        
+        // 시간 업데이트
+        function updateTime() {
+            document.getElementById('current-time').textContent = new Date().toLocaleString();
+        }
+        
+        // 시스템 상태 확인
+        async function checkSystemStatus() {
+            const statusEl = document.getElementById('system-status');
+            
+            try {
+                addLog('info', '시스템 상태 확인 시작');
+                
+                // 브라우저 정보
+                const browserInfo = {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    cookieEnabled: navigator.cookieEnabled,
+                    onLine: navigator.onLine
+                };
+                
+                // 화면 정보
+                const screenInfo = {
+                    width: screen.width,
+                    height: screen.height,
+                    colorDepth: screen.colorDepth,
+                    pixelDepth: screen.pixelDepth
+                };
+                
+                const status = `
+                    <strong>브라우저:</strong> ${browserInfo.userAgent}<br>
+                    <strong>언어:</strong> ${browserInfo.language}<br>
+                    <strong>플랫폼:</strong> ${browserInfo.platform}<br>
+                    <strong>쿠키 활성화:</strong> ${browserInfo.cookieEnabled}<br>
+                    <strong>온라인 상태:</strong> ${browserInfo.onLine}<br>
+                    <strong>화면 해상도:</strong> ${screenInfo.width}x${screenInfo.height}<br>
+                    <strong>색상 깊이:</strong> ${screenInfo.colorDepth}bit
+                `;
+                
+                statusEl.innerHTML = status;
+                addLog('info', '시스템 상태 확인 완료');
+                
+            } catch (error) {
+                statusEl.innerHTML = `<span style="color: #ff6666;">오류: ${error.message}</span>`;
+                addLog('error', `시스템 상태 확인 실패: ${error.message}`);
+            }
+        }
+        
+        // 리소스 상태 확인
+        async function checkResourceStatus() {
+            const statusEl = document.getElementById('resource-status');
+            
+            try {
+                addLog('info', '리소스 상태 확인 시작');
+                
+                const resources = [
+                    { name: 'Chart.js CDN', url: 'https://cdn.jsdelivr.net/npm/chart.js' },
+                    { name: 'Supabase 통합 스크립트', url: './supabase-integration.js' },
+                    { name: 'API 데이터', url: './api_data.json' },
+                    { name: '메인 대시보드', url: './index.html' }
+                ];
+                
+                const results = [];
+                
+                for (const resource of resources) {
+                    try {
+                        const response = await fetch(resource.url, { method: 'HEAD' });
+                        const status = response.ok ? '✅ 정상' : `❌ ${response.status}`;
+                        results.push(`<strong>${resource.name}:</strong> ${status}`);
+                        addLog('info', `${resource.name}: ${status}`);
+                    } catch (error) {
+                        results.push(`<strong>${resource.name}:</strong> ❌ 오류`);
+                        addLog('error', `${resource.name}: ${error.message}`);
+                    }
+                }
+                
+                statusEl.innerHTML = results.join('<br>');
+                addLog('info', '리소스 상태 확인 완료');
+                
+            } catch (error) {
+                statusEl.innerHTML = `<span style="color: #ff6666;">오류: ${error.message}</span>`;
+                addLog('error', `리소스 상태 확인 실패: ${error.message}`);
+            }
+        }
+        
+        // 데이터 미리보기
+        async function loadDataPreview() {
+            const previewEl = document.getElementById('data-preview');
+            
+            try {
+                addLog('info', 'API 데이터 로딩 시작');
+                
+                const response = await fetch('./api_data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                const preview = {
+                    version: '데이터에서 확인된 버전 정보 없음',
+                    last_updated: data.last_updated,
+                    total_sites: data.summary?.total_sites || 0,
+                    total_players: data.summary?.latest_total_players || 0,
+                    data_points: data.summary?.data_points || 0,
+                    sites_sample: Object.keys(data.sites || {}).slice(0, 5)
+                };
+                
+                previewEl.textContent = JSON.stringify(preview, null, 2);
+                addLog('info', `API 데이터 로딩 완료: ${preview.total_sites}개 사이트, ${preview.total_players}명 플레이어`);
+                
+            } catch (error) {
+                previewEl.textContent = `데이터 로딩 실패: ${error.message}`;
+                addLog('error', `API 데이터 로딩 실패: ${error.message}`);
+            }
+        }
+        
+        // 메인 대시보드 상태 확인
+        async function checkMainDashboard() {
+            try {
+                addLog('info', '메인 대시보드 상태 확인 시작');
+                
+                // iframe으로 메인 페이지 로드 시도
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = './index.html';
+                
+                document.body.appendChild(iframe);
+                
+                iframe.onload = function() {
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        const loadingEl = iframeDoc.getElementById('loading-indicator');
+                        const titleEl = iframeDoc.querySelector('h1');
+                        
+                        if (titleEl) {
+                            const version = titleEl.textContent.match(/v(\d+\.\d+\.\d+)/);
+                            addLog('info', `메인 대시보드 버전: ${version ? version[1] : '확인 불가'}`);
+                        }
+                        
+                        if (loadingEl) {
+                            const loadingVisible = window.getComputedStyle(loadingEl).display !== 'none';
+                            addLog(loadingVisible ? 'warn' : 'info', 
+                                  `로딩 인디케이터 상태: ${loadingVisible ? '표시됨 (무한 로딩 가능성)' : '숨겨짐 (정상)'}`);
+                        }
+                        
+                    } catch (e) {
+                        addLog('warn', `메인 대시보드 내부 확인 실패 (CORS 제한): ${e.message}`);
+                    }
+                    
+                    document.body.removeChild(iframe);
+                };
+                
+                iframe.onerror = function() {
+                    addLog('error', '메인 대시보드 로드 실패');
+                    document.body.removeChild(iframe);
+                };
+                
+            } catch (error) {
+                addLog('error', `메인 대시보드 확인 실패: ${error.message}`);
+            }
+        }
+        
+        // 초기화
+        async function initialize() {
+            addLog('info', '디버그 상태 모니터링 시작');
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            await checkSystemStatus();
+            await checkResourceStatus();
+            await loadDataPreview();
+            await checkMainDashboard();
+            
+            addLog('info', '디버그 상태 모니터링 초기화 완료');
+            
+            // 주기적 상태 확인
+            setInterval(async () => {
+                await checkResourceStatus();
+                await loadDataPreview();
+            }, 30000); // 30초마다
+        }
+        
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>
