@@ -337,6 +337,8 @@
         
         // 메인 초기화 함수
         async function initializeDashboard() {
+            const loadingEl = document.getElementById('loading-indicator');
+            
             try {
                 // 1. 데이터 로드
                 dashboardData = await loadDashboardData();
@@ -350,12 +352,24 @@
                 // 4. 차트 생성 (데이터가 있는 경우에만)
                 if (dashboardData.sites && Object.keys(dashboardData.sites).length > 0) {
                     createAllCharts();
+                    console.log('✅ Dashboard initialization completed successfully');
                 } else {
                     console.warn('No site data available for charts');
                 }
                 
+                // 5. 로딩 인디케이터 숨기기 (성공 시)
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
+                }
+                
             } catch (error) {
                 console.error('Dashboard initialization failed:', error);
+                
+                // 로딩 인디케이터 숨기기 (실패 시에도)
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
+                }
+                
                 const errorContainer = document.getElementById('error-container');
                 errorContainer.innerHTML = `
                     <div class="error-message">
@@ -492,6 +506,13 @@
         // 모든 차트를 생성하는 함수
         function createAllCharts() {
             try {
+                // Chart.js 라이브러리 로딩 확인
+                if (typeof Chart === 'undefined') {
+                    throw new Error('Chart.js 라이브러리가 로드되지 않았습니다');
+                }
+                
+                console.log('📊 Starting chart creation...');
+                
                 // 4개 차트 생성 (기본 7일)
                 createBarChart('onlinePlayersChart', 'Online Players', 'players_online', '7d');
                 createBarChart('cashPlayersChart', 'Cash Players', 'cash_players', '7d');
@@ -501,8 +522,21 @@
                 // 기간 선택 버튼 이벤트 리스너 추가
                 setupPeriodButtons();
                 
+                console.log('✅ All charts created successfully');
+                
             } catch (error) {
-                console.error('Error creating charts:', error);
+                console.error('❌ Error creating charts:', error);
+                
+                // 차트 생성 실패 시 에러 메시지 표시
+                const errorContainer = document.getElementById('error-container');
+                if (errorContainer) {
+                    errorContainer.innerHTML += `
+                        <div class="error-message">
+                            <strong>차트 생성 실패:</strong> ${error.message}<br>
+                            <small>Chart.js 라이브러리 로딩을 확인하세요</small>
+                        </div>
+                    `;
+                }
             }
         }
         
