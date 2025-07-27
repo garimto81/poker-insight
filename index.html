@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Insight Dashboard - 리다이렉트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .spinner {
+            display: inline-block;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+            font-size: 2em;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .countdown {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        .link {
+            color: #87CEEB;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner">⟳</div>
+        <h1>🎯 Poker Insight Dashboard</h1>
+        <p>대시보드로 자동 이동 중...</p>
+        <div class="countdown" id="countdown">3초 후 이동합니다</div>
+        <p>
+            자동 이동되지 않으면 
+            <a href="./docs/" class="link">여기를 클릭하세요</a>
+        </p>
+    </div>
+
+    <script>
+        let count = 3;
+        const countdownEl = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            count--;
+            countdownEl.textContent = `${count}초 후 이동합니다`;
+            
+            if (count <= 0) {
+                clearInterval(timer);
+                window.location.href = './docs/';
+            }
+        }, 1000);
+        
+        // 즉시 리다이렉트 (백업)
+        setTimeout(() => {
+            window.location.href = './docs/';
+        }, 3000);
+    </script>
+</body>
+</html>
